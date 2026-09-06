@@ -1,3 +1,4 @@
+import { PageContainer } from '../components/layout/PageContainer'
 import { EmptyState } from '../components/common/EmptyState'
 import { ErrorBanner } from '../components/common/ErrorBanner'
 import { PostCard, PostCardSkeleton } from '../components/posts/PostCard'
@@ -7,7 +8,7 @@ export default function FeedPage() {
   const { data, isPending, isError, error } = usePostsList()
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-8">
+    <PageContainer>
       <div className="font-mono text-[11px] font-semibold tracking-wider text-slate-400 uppercase mb-4">
         Top Posts
       </div>
@@ -29,6 +30,6 @@ export default function FeedPage() {
       {!isPending &&
         !isError &&
         data.posts.map((post) => <PostCard key={post.id} post={post} />)}
-    </div>
+    </PageContainer>
   )
 }

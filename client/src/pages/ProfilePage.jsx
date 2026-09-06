@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom'
+import { PageContainer } from '../components/layout/PageContainer'
 import { ErrorBanner } from '../components/common/ErrorBanner'
 import { LoadingSpinner } from '../components/common/LoadingSpinner'
 import { ExperienceList } from '../components/profile/ExperienceList'
@@ -14,27 +15,29 @@ export default function ProfilePage() {
 
   if (profile.isPending) {
     return (
-      <div className="max-w-2xl mx-auto px-6 py-8 flex justify-center text-slate-400">
-        <LoadingSpinner />
-      </div>
+      <PageContainer>
+        <div className="flex justify-center text-slate-400">
+          <LoadingSpinner />
+        </div>
+      </PageContainer>
     )
   }
 
   if (profile.isError) {
     return (
-      <div className="max-w-2xl mx-auto px-6 py-8">
+      <PageContainer>
         <ErrorBanner
           title={profile.error.statusCode === 404 ? 'User not found' : 'Failed to load profile'}
           message={profile.error.statusCode === 404 ? "This user doesn't exist." : profile.error.message}
         />
-      </div>
+      </PageContainer>
     )
   }
 
   const data = profile.data
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-8">
+    <PageContainer>
       <div className="flex items-center gap-3.5 mb-4">
         <div className="w-14 h-14 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg flex-shrink-0">
           {data.name.slice(0, 2).toUpperCase()}
@@ -65,6 +68,6 @@ export default function ProfilePage() {
 
       <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3 mt-8">Experience</div>
       <ExperienceList userId={userId} experiences={data.experiences} editable={isOwn} />
-    </div>
+    </PageContainer>
   )
 }

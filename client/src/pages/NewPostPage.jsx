@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { PageContainer } from '../components/layout/PageContainer'
 import { PostForm } from '../components/posts/PostForm'
 import { useCreatePost } from '../hooks/usePosts'
 
@@ -19,9 +20,9 @@ export default function NewPostPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-8">
+    <PageContainer>
       <h1 className="text-lg font-semibold text-slate-900 mb-4">New post</h1>
       <PostForm onSubmit={handleSubmit} submitting={createPost.isPending} error={error} />
-    </div>
+    </PageContainer>
   )
 }

@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { PageContainer } from '../components/layout/PageContainer'
 import { ErrorBanner } from '../components/common/ErrorBanner'
 import { LoadingSpinner } from '../components/common/LoadingSpinner'
 import { CommentForm } from '../components/comments/CommentForm'
@@ -25,25 +26,27 @@ export default function PostDetailPage() {
 
   if (post.isPending) {
     return (
-      <div className="max-w-2xl mx-auto px-6 py-8 flex justify-center text-slate-400">
-        <LoadingSpinner />
-      </div>
+      <PageContainer>
+        <div className="flex justify-center text-slate-400">
+          <LoadingSpinner />
+        </div>
+      </PageContainer>
     )
   }
 
   if (post.isError) {
     return (
-      <div className="max-w-2xl mx-auto px-6 py-8">
+      <PageContainer>
         <ErrorBanner
           title={post.error.statusCode === 404 ? 'Post not found' : 'Failed to load post'}
           message={post.error.statusCode === 404 ? "This post doesn't exist or was removed." : post.error.message}
         />
-      </div>
+      </PageContainer>
     )
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-8">
+    <PageContainer>
       <Link to="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 mb-5">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -92,6 +95,6 @@ export default function PostDetailPage() {
       {!comments.isPending && !comments.isError && (
         <CommentThread comments={comments.data} postId={id} />
       )}
-    </div>
+    </PageContainer>
   )
 }

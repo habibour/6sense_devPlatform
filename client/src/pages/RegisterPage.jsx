@@ -26,7 +26,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+    <div className="flex items-center justify-center px-4 py-16">
       <form onSubmit={handleSubmit} className="w-full max-w-sm bg-white border border-slate-200 rounded-lg p-6">
         <h1 className="text-lg font-semibold text-slate-900 mb-4">Create an account</h1>
 

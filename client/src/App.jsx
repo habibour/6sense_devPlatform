@@ -1,44 +1,18 @@
-import { Link, Route, Routes } from 'react-router-dom'
-import { useAuth } from './context/AuthContext'
+import { Route, Routes } from 'react-router-dom'
+import { Navbar } from './components/layout/Navbar'
 import FeedPage from './pages/FeedPage'
 import LoginPage from './pages/LoginPage'
 import NewPostPage from './pages/NewPostPage'
+import NotFoundPage from './pages/NotFoundPage'
 import PostDetailPage from './pages/PostDetailPage'
 import ProfilePage from './pages/ProfilePage'
 import RegisterPage from './pages/RegisterPage'
 import ProtectedRoute from './routes/ProtectedRoute'
 
-function TempHeader() {
-  const { user, logout } = useAuth()
-
-  return (
-    <div className="border-b border-slate-200 bg-white px-6 py-3 flex justify-between items-center text-sm">
-      <span className="font-bold">
-        dev<span className="text-indigo-600">community</span>
-      </span>
-      {user ? (
-        <span className="text-slate-600">
-          <Link to="/posts/new" className="text-indigo-600 hover:text-indigo-700 mr-3">New post</Link>
-          <Link to={`/profile/${user.id}`} className="text-indigo-600 hover:text-indigo-700">{user.name}</Link>{' '}
-          <button onClick={logout} className="ml-2 text-indigo-600 hover:text-indigo-700">
-            Logout
-          </button>
-        </span>
-      ) : (
-        <span>
-          <Link to="/login" className="text-indigo-600 hover:text-indigo-700">Login</Link>
-          {' · '}
-          <Link to="/register" className="text-indigo-600 hover:text-indigo-700">Register</Link>
-        </span>
-      )}
-    </div>
-  )
-}
-
 function App() {
   return (
     <div className="min-h-screen bg-slate-50">
-      <TempHeader />
+      <Navbar />
       <Routes>
         <Route path="/" element={<FeedPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -48,6 +22,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/posts/new" element={<NewPostPage />} />
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>
   )
