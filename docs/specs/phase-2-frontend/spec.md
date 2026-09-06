@@ -14,7 +14,7 @@ A React SPA (JavaScript/JSX) covering every screen the assignment requires, each
 - **Error state**: invalid credentials / duplicate email show the API's `message` inline on the form, not a silent failure or console-only error.
 
 ### Feed (F2)
-- `/` lists posts from `GET /api/posts`, already ranked by the backend; each `PostCard` shows title, author, `likeCount`/`dislikeCount`, `commentCount`, and score-derived ordering (no client-side re-sorting).
+- `/` lists posts from `GET /api/posts`, already ranked by the backend; each `PostCard` shows title, author, `likeCount`/`dislikeCount`, `commentCount`, and score-derived ordering (no client-side re-sorting). The posts response only carries `authorId`; the author's display name is resolved per id via `useUser(authorId)` (`GET /api/users/:id`), cached/deduped by TanStack Query — same for comment authors under F4.
 - **Loading state**: skeleton/spinner while the initial fetch is in flight.
 - **Empty state**: distinct "no posts yet" message when the list is empty (not a blank page).
 - **Error state**: distinct error banner if the fetch fails, with no stale/misleading content shown.
@@ -33,6 +33,7 @@ A React SPA (JavaScript/JSX) covering every screen the assignment requires, each
 - Clicking like/dislike calls `POST /api/reactions`; the UI reflects the new count/state **without a full page reload** — implemented via TanStack Query cache invalidation of the relevant post/comment query, not a manual `window.location.reload()` or full re-fetch of unrelated data.
 - Clicking an already-active reaction removes it (`DELETE /api/reactions/:targetType/:targetId`).
 - Reaction controls are hidden or disabled (not merely non-functional) for unauthenticated visitors, with a clear affordance to log in.
+- **Known API gap**: there is no endpoint to fetch "does the current user already have a reaction on X" — only `POST /api/reactions` and `DELETE /api/reactions/:targetType/:targetId` exist. The frontend tracks each reaction's "active" state client-side, per session (via component state), which resets on a page reload rather than persisting.
 
 ### Profile (F6)
 - `/profile/:userId` shows a developer's name, bio, skills, and experiences via `GET /api/users/:id`.

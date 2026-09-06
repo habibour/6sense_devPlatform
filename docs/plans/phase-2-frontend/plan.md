@@ -35,3 +35,14 @@ Manually walk: register → login persists across refresh → create post → co
 
 ## Exit Criteria to Move to Phase 3
 Every screen in the Phase 2 spec exists, is wired to the real API (no mock data), and the reaction-without-reload requirement is confirmed via the network tab, not just visually.
+
+## Implementation Notes (post-build)
+
+Phase 2 is fully built (Steps 1–8 complete, verified live in-browser at each step). A few points where the actual build diverged from this plan's original wording:
+
+- **No separate `useAuthor.js`**: author-name resolution (`authorId` → display name, since the posts/comments API never expands the author relation) is handled by `useUser(id)` in `hooks/useProfile.js`, shared by `PostCard`, `CommentThread`, and `ProfilePage` — one query key (`['users', id]`), not a duplicate hook.
+- **`hooks/usePosts.js`** ended up with `usePostsList()`, `usePost(id)`, and `useCreatePost()` together (all built across Steps 4–5), rather than being split as the step list implies.
+- **`hooks/useProfile.js`** holds `useUser(id)`, `useSkills(userId)`, `useExperiences(userId)` — no `useUpdateProfile()`; the Phase 2 spec's F6 only requires edit affordances for skills and experience, not bio/name, so that hook was never built (avoiding dead code).
+- **Reactions have a known API gap**: no endpoint exists to fetch "does the current user already have a reaction on X." `ReactionButtons` tracks "active" state client-side per session (component state), which resets on reload — this is a Phase 1 API limitation, not a frontend bug. See `docs/specs/phase-2-frontend/spec.md`'s F5 section.
+- **Two real bugs were found and fixed during verification**: (1) `createComment` always sent `parentCommentId: null` for top-level comments, but the backend's zod schema uses `.optional()` (rejects `null`, only accepts an absent key) — fixed by omitting the key when there's no parent. (2) `FeedPage` originally gated rendering on `isLoading`/`isError`, which left a gap where `data` was `undefined` but neither flag was true during a TanStack Query v5 retry — fixed by gating on `isPending` instead. The same `null`-vs-omitted-key pattern was proactively avoided in `ExperienceForm` (Step 7) for the `to`/`description` fields.
+- **Mobile-width visual verification was inconclusive**: the browser automation tool's `resize_window` didn't change the tab's actual viewport in this environment, so the responsive layout (built entirely with flex/flex-wrap and relative widths, no fixed-width or multi-column elements) was not visually confirmed at a phone-width viewport, only reasoned about from the CSS itself.
