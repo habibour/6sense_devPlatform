@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String       @id @default(uuid())
+  name         String
+  email        String       @unique
+  passwordHash String
+  bio          String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  skills       Skill[]
+  experiences  Experience[]
+  posts        Post[]
+  comments     Comment[]
+  reactions    Reaction[]
+}
+
+model Skill {
+  id     String @id @default(uuid())
+  userId String
+  name   String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model Experience {
+  id          String    @id @default(uuid())
+  userId      String
+  title       String
+  company     String
+  from        DateTime
+  to          DateTime?
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Post {
+  id           String    @id @default(uuid())
+  authorId     String
+  title        String
+  body         String
+  likeCount    Int       @default(0)
+  dislikeCount Int       @default(0)
+  commentCount Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  author       User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments     Comment[]
+
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+model Comment {
+  id              String    @id @default(uuid())
+  postId          String
+  authorId        String
+  parentCommentId String?
+  body            String
+  likeCount       Int       @default(0)
+  dislikeCount    Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author  User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
+
+  @@index([postId])
+  @@index([parentCommentId])
+}
+
+enum TargetType {
+  POST
+  COMMENT
+}
+
+enum ReactionType {
+  LIKE
+  DISLIKE
+}
+
+model Reaction {
+  id         String       @id @default(uuid())
+  userId     String
+  targetType TargetType
+  targetId   String
+  type       ReactionType
+  createdAt  DateTime     @default(now())
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetType, targetId])
+  @@index([targetType, targetId])
+}
