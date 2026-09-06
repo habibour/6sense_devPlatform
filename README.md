@@ -1,16 +1,22 @@
+<p align="center"><img src="client/src/assets/logo.svg" width="72" alt="DevCommunity logo" /></p>
+
 # Dev Community Platform
 
 A developer community app — posts, threaded comments, like/dislike reactions, a ranked feed, and developer profiles (skills + experience). Built for the 6sense Agentic Software Engineer intern take-home assignment (see `Agentic Engineering Intern Assignement.md` and `docs/PRD.md` for product intent).
 
 ## Screenshots
 
-| Ranked feed | Post detail + threaded comments |
-|---|---|
-| ![Feed](docs/screenshots/feed.jpg) | ![Post detail](docs/screenshots/post-detail.jpg) |
+**Ranked feed**
+![Feed](docs/screenshots/feed.jpg)
 
-| Developer profile (skills + experience) | New post |
-|---|---|
-| ![Profile](docs/screenshots/profile.jpg) | ![New post](docs/screenshots/new-post.jpg) |
+**Post detail + threaded comments**
+![Post detail](docs/screenshots/post-detail.jpg)
+
+**Developer profile (skills + experience)**
+![Profile](docs/screenshots/profile.jpg)
+
+**New post**
+![New post](docs/screenshots/new-post.jpg)
 
 ## Tech stack
 
@@ -21,7 +27,7 @@ A developer community app — posts, threaded comments, like/dislike reactions, 
 | Frontend | Vite + React SPA, JavaScript/JSX, React Router, TanStack Query, Tailwind CSS |
 | Testing | Jest unit tests for the backend services layer (see [Tests](#tests)) |
 
-See `docs/adr/` for the reasoning behind each of these choices.
+See `docs/adr/` for the reasoning behind each of these choices. Icons are from `lucide-react` (ADR 0009); the logo is a hand-authored SVG mark at `client/src/assets/logo.svg`.
 
 ## Architecture overview
 
@@ -121,6 +127,8 @@ npm run dev                # starts on http://localhost:4000, auto-restarts on f
 ```
 
 `JWT_SECRET` has no default and the server refuses to boot without it (see `src/config/env.js`) — set it to any long random string, e.g. generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. You should see `Server listening on http://localhost:4000` in the terminal once it's up; leave this terminal running.
+
+> 🌱 **Run the seed script.** A fresh clone starts with an empty database. Run `npm run prisma:seed` (shown above) before opening the app, or the feed will be empty. It populates 6 demo users and 16 long-form posts with comments and reactions, so the app looks like a real, active platform from the first page load — see [Testing the app](#testing-the-app) for login credentials and a full walkthrough.
 
 If you're just running the app rather than changing `schema.prisma`, `npx prisma migrate deploy` applies the existing migrations non-interactively (no migration-name prompt) — use that instead of `migrate dev` if you want a fully scripted setup.
 
@@ -234,7 +242,9 @@ npm test
 
 ## Testing the app
 
-`npm run prisma:seed` (run once, from `server/`, after migrating) wipes and repopulates the database with 6 demo users, 6 posts, comments, and reactions — the same data shown in the screenshots above. It's safe to re-run any time; it deletes existing rows first, so only use it against your local dev database.
+> **New here?** Run `npm run prisma:seed` first (see Step 3 above) — everything below assumes a seeded database.
+
+`npm run prisma:seed` (run once, from `server/`, after migrating) wipes and repopulates the database with 6 demo users, 16 posts, comments, and reactions — the same kind of data shown in the screenshots above. It's safe to re-run any time; it deletes existing rows first, so only use it against your local dev database.
 
 | Name | Email | Password |
 |---|---|---|
@@ -260,7 +270,7 @@ With both servers running and the DB seeded:
 1. **Browse the feed (logged out).** Open `http://localhost:5174` — you'll see the ranked "TOP POSTS" list with like/dislike/comment counts. Reaction buttons are disabled and read "Log in to react".
 2. **Log in.** Click **Login** (top right), enter one of the demo emails/`Password123!` from the table above. The navbar swaps to **New post / \<Your name\> / Logout**.
 3. **Open a post.** Click any post title to see its full body, reaction counts, and threaded comments.
-4. **React.** Click the like/dislike arrows on the post (or on any comment) — the count updates immediately; clicking your own active reaction again removes it, clicking the other one switches it (one reaction per user per target). Reload the page — the highlight survives, since it's fetched from the server.
+4. **React.** Click the heart (like) or thumbs-down (dislike) button on the post (or on any comment) — the count updates immediately; clicking your own active reaction again removes it, clicking the other one switches it (one reaction per user per target). Reload the page — the highlight survives, since it's fetched from the server.
 5. **Comment.** Type in "Add a comment" and click **Post comment** — it appears at the bottom of the thread. Click **Reply** under an existing comment to add a threaded reply.
 6. **Create a post.** Click **New post** in the navbar, fill in Title/Body, submit — you're taken to the new post, and it appears in the feed ranked by the formula below.
 7. **Edit your profile.** Click your name in the navbar to open your profile: add/remove skills via the "Add a skill" input, and add a work experience entry (title, company, dates, description) via **+ Add experience**; existing entries have **Edit**/**Delete**.

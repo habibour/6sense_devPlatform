@@ -33,7 +33,8 @@ A React SPA (JavaScript/JSX) covering every screen the assignment requires, each
 - Clicking like/dislike calls `POST /api/reactions`; the UI reflects the new count/state **without a full page reload** — implemented via TanStack Query cache invalidation of the relevant post/comment query, not a manual `window.location.reload()` or full re-fetch of unrelated data.
 - Clicking an already-active reaction removes it (`DELETE /api/reactions/:targetType/:targetId`).
 - Reaction controls are hidden or disabled (not merely non-functional) for unauthenticated visitors, with a clear affordance to log in.
-- **Known API gap**: there is no endpoint to fetch "does the current user already have a reaction on X" — only `POST /api/reactions` and `DELETE /api/reactions/:targetType/:targetId` exist. The frontend tracks each reaction's "active" state client-side, per session (via component state), which resets on a page reload rather than persisting.
+- The current user's existing reaction on a target is fetched via `GET /api/reactions/me/:targetType/:targetId` (`useMyReaction`), so active like/dislike state is server-sourced and persists across reload/navigation rather than resetting per session.
+- Visually, reactions render as a vertical vote rail (like on top, dislike below, each with its own count) on feed cards, and as a horizontal row near the title/body on the post-detail page and on each comment — both driven by the same `ReactionButtons` component's `orientation` prop, no separate data contract.
 
 ### Profile (F6)
 - `/profile/:userId` shows a developer's name, bio, skills, and experiences via `GET /api/users/:id`.

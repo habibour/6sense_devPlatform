@@ -78,7 +78,7 @@ This project is built spec-driven. Before writing code for a phase, its spec and
 - **`docs/specs/phase-N-*/spec.md`** — what a phase must deliver: contracts (API shapes, screens) and acceptance criteria. Describes *what*, not *how*.
 - **`docs/plans/phase-N-*/plan.md`** — how a phase gets built: ordered technical steps, file paths, verification steps. Describes *how*, not *what*.
 - **Mapping**: a spec and its plan share the same phase folder name (e.g. `docs/specs/phase-1-backend/` ↔ `docs/plans/phase-1-backend/`) — that shared name is the only link between them, there is no separate index file.
-- Current phases: `phase-0-foundation` (repo/DB/backend skeleton), `phase-1-backend` (full API), `phase-2-frontend` (full SPA), `phase-3-polish-and-docs` (consistency pass + README/AI_USAGE).
+- Current phases: `phase-0-foundation` (repo/DB/backend skeleton), `phase-1-backend` (full API), `phase-2-frontend` (full SPA), `phase-3-polish-and-docs` (consistency pass + README/AI_USAGE), `phase-4-reddit-redesign` (Reddit-style visual redesign, expanded seed data, logo — a post-submission follow-on, not an assignment requirement).
 - If implementation diverges from a spec during a phase (a route shape changes, a screen gets simplified), update that phase's `spec.md` to match reality before moving on — the docs should never describe a version of the app that doesn't exist.
 
 ## Coding Conventions
@@ -98,6 +98,17 @@ Use `utils/apiResponse.js#sendSuccess` and throw `utils/ApiError.js#ApiError` �
 - No secrets committed, ever. `.env.example` documents variable *names* only; real `.env` files are git-ignored.
 - Prefer editing/extending an existing file over introducing a new pattern for the same kind of thing (e.g. every resource has the same routes/controller/service/validator file shape — follow it).
 - Don't build ahead of the current phase's spec (no refresh tokens, no Jest tests, no optimistic UI, no pagination beyond page/limit) unless `docs/PRD.md`'s out-of-scope section is explicitly revised first.
+
+### Code comments
+This codebase favors explaining the *why* behind non-obvious logic (a hidden constraint, a trade-off, a subtle invariant) over restating *what* the code does — a comment that just repeats the next line in prose is noise. Both backend and frontend carry a comment on essentially every file/function of real complexity; trivial one-line wrappers and self-evident glue code are left uncommented rather than padded out.
+
+## Frontend Design System
+The UI is styled Reddit-style (chrome, card feed, vote rail, left rail + right sidebar) using a teal brand palette. This is a design-system layer on top of the choices in ADR 0003, not a replacement of them.
+
+- **Tokens**: `client/src/index.css` defines a Tailwind v4 `@theme` block — a `--color-brand-*` teal ramp (the app's brand color), a `--color-chrome-*` neutral ramp (borders/backgrounds, used instead of Tailwind's stock `slate`/`gray`), and two one-off accent tokens, `--color-like` (heart/like, red) and `--color-dislike` (thumbs-down/dislike, reuses `brand-600`) — kept separate from the brand ramp because "like" needs a universally-recognizable red regardless of brand color. New UI work should use these tokens (`bg-brand-500`, `text-chrome-600`, `text-like`, etc.), not ad hoc Tailwind colors.
+- **Icons**: `lucide-react` (see ADR 0009) — import icons as components, don't hand-roll new inline SVGs.
+- **Layout**: `client/src/components/layout/AppShell.jsx` provides the Reddit-style left-rail/content/right-sidebar shell, used by the feed and post-detail pages. Other pages (auth, new-post, profile, 404) intentionally stay on the simpler `PageContainer` single-column layout — mirrors how Reddit itself treats those page types.
+- **Assets**: `client/src/assets/` holds the app logo (`logo.svg`); `client/public/favicon.svg` is the browser-tab version of the same mark.
 
 ## Running Locally
 See root `README.md` for the full sequence. Short version: `docker compose up -d` → `cd server && npm install && npx prisma migrate dev && npm run dev` → `cd client && npm install && npm run dev` → Swagger at `http://localhost:<PORT>/api-docs`.
