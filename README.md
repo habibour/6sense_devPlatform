@@ -2,7 +2,15 @@
 
 A developer community app — posts, threaded comments, like/dislike reactions, a ranked feed, and developer profiles (skills + experience). Built for the 6sense Agentic Software Engineer intern take-home assignment (see `Agentic Engineering Intern Assignement.md` and `docs/PRD.md` for product intent).
 
-![Dev Community feed screenshot](docs/screenshots/feed.jpg)
+## Screenshots
+
+| Ranked feed | Post detail + threaded comments |
+|---|---|
+| ![Feed](docs/screenshots/feed.jpg) | ![Post detail](docs/screenshots/post-detail.jpg) |
+
+| Developer profile (skills + experience) | New post |
+|---|---|
+| ![Profile](docs/screenshots/profile.jpg) | ![New post](docs/screenshots/new-post.jpg) |
 
 ## Tech stack
 
@@ -33,7 +41,7 @@ Monorepo layout:
   server/             Express + JavaScript + Prisma API  (server/prisma/schema.prisma, server/src/...)
   client/             Vite + React SPA (JavaScript/JSX)  (client/src/...)
   docs/               spec-driven docs: PRD, ADRs, per-phase specs and plans
-    screenshots/      app screenshots used in this README
+    screenshots/      app screenshots used in this README (feed, post detail, profile, new post)
   docker-compose.yml
 ```
 
