@@ -51,15 +51,53 @@ See `docs/adr/` for the reasoning behind each of these choices. Icons are from `
 
 ## Architecture overview
 
+### Request lifecycle
+Every request flows through the same layers regardless of endpoint — routes only wire path/method/middleware, controllers parse and delegate, services hold all business logic and are the only layer that talks to Prisma:
+
+```mermaid
+flowchart TD
+    subgraph Client["Browser — React SPA (Vite)"]
+        UI["Pages & components"] --> RQ["TanStack Query"] --> AX["Axios client<br/>client/src/api/client.js<br/>sends Authorization: Bearer JWT"]
+    end
+
+    AX -->|"HTTPS request"| CORS
+
+    subgraph API["Express API — server/src"]
+        CORS["cors middleware<br/>origin = CORS_ORIGIN"] --> RT["routes/*.routes.js<br/>path + method + middleware wiring only"]
+        RT --> AUTH{"requireAuth?<br/>middlewares/auth.js"}
+        AUTH -->|"yes: verifies JWT"| CTRL
+        AUTH -->|"no: public route"| CTRL["controllers/*.controller.js<br/>parse request, call a service"]
+        CTRL --> SVC["services/*.service.js<br/>ranking, reaction counters,<br/>comment threading, auth logic"]
+        SVC --> PRISMA["database/prisma.js<br/>single PrismaClient instance"]
+        CTRL --> RESP["utils/apiResponse.js / ApiError.js<br/>consistent success/error envelope"]
+    end
+
+    PRISMA -->|"SQL via Prisma Client"| DB[("PostgreSQL<br/>schema.prisma = source of truth")]
+    RESP -->|"JSON response"| AX
 ```
-Browser (React SPA, :5174)
-   │  fetch, Bearer JWT
-   ▼
-Express REST API (:4000/api)
-   │  routes → controllers → services
-   ▼
-PostgreSQL (Docker, :5433)  ←  Prisma schema.prisma (single source of truth for data models)
+
+### Production deployment topology
+The [Live Demo](#live-demo) runs on Render (frontend + backend) and Neon (database) — see [Deployment](#deployment) for the reproducible steps and `docs/adr/0010-deployment-platform.md` for the reasoning:
+
+```mermaid
+flowchart LR
+    V(["Visitor's browser"])
+
+    subgraph Render["Render — free tier"]
+        FE["Static Site (client/)<br/>vite build → dist/<br/>sixsense-devplatform-client.onrender.com"]
+        BE["Web Service (server/)<br/>npm start<br/>sixsense-devplatform.onrender.com"]
+    end
+
+    NEON[("Neon<br/>serverless Postgres<br/>scales to zero, auto-wakes")]
+
+    V -->|"GET /"| FE
+    FE -->|"fetch VITE_API_BASE_URL/api/*<br/>Authorization: Bearer JWT"| BE
+    BE -->|"DATABASE_URL (sslmode=require)"| NEON
 ```
+
+Two things that don't show up as boxes but matter: the frontend's SPA client-side routes (e.g. `/login`, `/posts/:id`) are served via a Render dashboard Redirect/Rewrite rule (`/*` → `/index.html`), not a repo file — Render doesn't support Netlify's `_redirects` convention; and the backend's free instance spins down after 15 minutes idle, so the first request after a quiet period takes ~30-60s to wake.
+
+Locally the same request lifecycle runs against `docker-compose.yml`'s Postgres container instead of Neon (see [Local setup](#local-setup) below).
 
 Monorepo layout:
 
