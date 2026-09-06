@@ -38,7 +38,7 @@ Monorepo layout:
 
 ```
 6sense_project/
-  server/             Express + JavaScript + Prisma API  (server/prisma/schema.prisma, server/src/...)
+  server/             Express + JavaScript + Prisma API  (server/prisma/schema.prisma, server/prisma/seed.js, server/src/...)
   client/             Vite + React SPA (JavaScript/JSX)  (client/src/...)
   docs/               spec-driven docs: PRD, ADRs, per-phase specs and plans
     screenshots/      app screenshots used in this README (feed, post detail, profile, new post)
@@ -70,6 +70,7 @@ cd server
 npm install
 cp .env.example .env      # fill in JWT_SECRET; other defaults match docker-compose.yml
 npx prisma migrate dev
+npm run prisma:seed        # optional: populates demo users/posts, see "Testing the app" below
 npm run dev                # http://localhost:4000
 
 # 3. Frontend (new terminal)
@@ -102,6 +103,27 @@ Open `http://localhost:5174` in a browser.
 ## API docs (Swagger)
 
 With the server running, open **`http://localhost:4000/api-docs`** for the full OpenAPI 3.0 spec, grouped by resource (Users, Reactions, Posts, Comments, Auth). Use the **Authorize** button with a JWT from `POST /auth/login` or `POST /auth/register` to try authenticated endpoints directly from the UI.
+
+## Testing the app
+
+`npm run prisma:seed` (run once, from `server/`, after migrating) wipes and repopulates the database with 6 demo users, 6 posts, comments, and reactions — the same data shown in the screenshots above. It's safe to re-run any time; it deletes existing rows first, so only use it against your local dev database.
+
+| Name | Email | Password |
+|---|---|---|
+| Maria Alvarez | `maria.alvarez@example.com` | `Password123!` |
+| Jordan Lee | `jordan.lee@example.com` | `Password123!` |
+| Priya Nair | `priya.nair@example.com` | `Password123!` |
+| Sam Okafor | `sam.okafor@example.com` | `Password123!` |
+| Alex Kim | `alex.kim@example.com` | `Password123!` |
+| Chen Wu | `chen.wu@example.com` | `Password123!` |
+
+Log in as any of them, or skip the seed and click **Register** to create your own account — either way you land in the same place:
+
+- **The feed is global, not per-user.** Every logged-in (or logged-out) visitor sees the same ranked list of *all* posts from *all* authors — there's no "your posts" view. Logging in doesn't change what's visible, only what you can do: react, comment, create a post, and edit your own profile. Logged-out visitors can browse the feed and post detail read-only ("Log in to react").
+- Reactions are one-per-user-per-target (post or comment) — the UI reflects your own like/dislike state on things you've already reacted to, but everyone sees the same aggregate `likeCount`/`dislikeCount`/`commentCount` regardless of who's logged in.
+- A freshly registered account starts with an empty profile (no skills, no experience, no posts) — those are edited from the profile page.
+
+If you skip `prisma:seed` entirely, the database starts empty and the feed has nothing in it until someone creates a post.
 
 ## Ranking formula
 
