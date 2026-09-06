@@ -1,44 +1,45 @@
 import { Link, Route, Routes } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
+import FeedPage from './pages/FeedPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 
-function HomePlaceholder() {
+function TempHeader() {
   const { user, logout } = useAuth()
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-slate-900">
-          dev<span className="text-indigo-600">community</span>
-        </h1>
-        <p className="mt-2 text-sm text-slate-500">Feed comes in Step 4.</p>
-        {user ? (
-          <div className="mt-4 text-sm text-slate-700">
-            Logged in as <span className="font-medium">{user.name}</span>{' '}
-            <button onClick={logout} className="ml-2 text-indigo-600 hover:text-indigo-700">
-              Logout
-            </button>
-          </div>
-        ) : (
-          <div className="mt-4 text-sm">
-            <Link to="/login" className="text-indigo-600 hover:text-indigo-700">Login</Link>
-            {' · '}
-            <Link to="/register" className="text-indigo-600 hover:text-indigo-700">Register</Link>
-          </div>
-        )}
-      </div>
+    <div className="border-b border-slate-200 bg-white px-6 py-3 flex justify-between items-center text-sm">
+      <span className="font-bold">
+        dev<span className="text-indigo-600">community</span>
+      </span>
+      {user ? (
+        <span className="text-slate-600">
+          {user.name}{' '}
+          <button onClick={logout} className="ml-2 text-indigo-600 hover:text-indigo-700">
+            Logout
+          </button>
+        </span>
+      ) : (
+        <span>
+          <Link to="/login" className="text-indigo-600 hover:text-indigo-700">Login</Link>
+          {' · '}
+          <Link to="/register" className="text-indigo-600 hover:text-indigo-700">Register</Link>
+        </span>
+      )}
     </div>
   )
 }
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePlaceholder />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-    </Routes>
+    <div className="min-h-screen bg-slate-50">
+      <TempHeader />
+      <Routes>
+        <Route path="/" element={<FeedPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+      </Routes>
+    </div>
   )
 }
 
