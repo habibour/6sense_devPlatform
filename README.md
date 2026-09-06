@@ -56,31 +56,98 @@ Deeper rationale for each architectural decision is in `docs/adr/000N-*.md`; wha
 
 ## Local setup
 
-Prerequisites: Docker, Node.js 18+.
+### Prerequisites
+
+- **Docker Desktop** (or any Docker Engine + Compose v2) — running before step 1. Check with `docker --version` and `docker compose version`.
+- **Node.js 18+** and **npm** — check with `node -v` and `npm -v`.
+- **git**.
+- Ports **5433** (Postgres), **4000** (API), and **5174** (Vite dev server) free on your machine. If one is taken, see [Troubleshooting](#troubleshooting) below.
+
+### Step 1 — clone the repo
 
 ```bash
 git clone <this-repo-url>
 cd 6sense_project
-
-# 1. Database
-docker compose up -d
-
-# 2. Backend
-cd server
-npm install
-cp .env.example .env      # fill in JWT_SECRET; other defaults match docker-compose.yml
-npx prisma migrate dev
-npm run prisma:seed        # optional: populates demo users/posts, see "Testing the app" below
-npm run dev                # http://localhost:4000
-
-# 3. Frontend (new terminal)
-cd client
-npm install
-cp .env.example .env      # defaults already point at the backend above
-npm run dev                # http://localhost:5174
 ```
 
-Open `http://localhost:5174` in a browser.
+### Step 2 — start Postgres
+
+```bash
+docker compose up -d
+```
+
+This starts a single `postgres:16-alpine` container (`dev_community_db`) on host port **5433**, with a named volume (`pgdata`) so data survives container restarts. Verify it's up with `docker compose ps` — `STATUS` should say `Up`. No `.env` file is needed for this step; `docker-compose.yml` has working defaults (`devcommunity`/`devcommunity`/`devcommunity`) that already match `server/.env.example`.
+
+### Step 3 — backend (Express API)
+
+```bash
+cd server
+npm install
+cp .env.example .env       # then open .env and fill in JWT_SECRET (see below); other defaults already match docker-compose.yml
+npx prisma migrate dev     # creates the schema in Postgres; prompts for a migration name only if you've changed schema.prisma
+npm run prisma:seed        # optional but recommended: populates demo users/posts — see "Testing the app" below
+npm run dev                # starts on http://localhost:4000, auto-restarts on file changes (node --watch)
+```
+
+`JWT_SECRET` has no default and the server refuses to boot without it (see `src/config/env.js`) — set it to any long random string, e.g. generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. You should see `Server listening on http://localhost:4000` in the terminal once it's up; leave this terminal running.
+
+### Step 4 — frontend (React SPA)
+
+Open a **second terminal** (keep the backend running in the first):
+
+```bash
+cd client
+npm install
+cp .env.example .env       # default VITE_API_BASE_URL already points at http://localhost:4000/api
+npm run dev                # starts on http://localhost:5174 (Vite picks the next free port if taken)
+```
+
+### Step 5 — open the app
+
+Go to **http://localhost:5174** in a browser. You should see the `devcommunity` navbar and a "TOP POSTS" feed (empty if you skipped seeding — see [Testing the app](#testing-the-app)).
+
+### Available scripts
+
+| Location | Script | What it does |
+|---|---|---|
+| `server/` | `npm run dev` | Start the API with auto-restart on file changes |
+| `server/` | `npm start` | Start the API once, no watch (production-style) |
+| `server/` | `npm run prisma:generate` | Regenerate the Prisma client after editing `schema.prisma` |
+| `server/` | `npm run prisma:migrate` | Create/apply a migration from `schema.prisma` changes |
+| `server/` | `npm run prisma:seed` | Wipe and repopulate the DB with demo data (also runs via `npx prisma db seed` / `prisma migrate reset`) |
+| `server/` | `npm run lint` | ESLint over the backend |
+| `client/` | `npm run dev` | Start the Vite dev server |
+| `client/` | `npm run build` | Production build to `client/dist` |
+| `client/` | `npm run preview` | Serve the production build locally |
+| `client/` | `npm run lint` | oxlint over the frontend |
+
+### Stopping and resetting
+
+```bash
+# Stop the dev servers: Ctrl+C in each terminal.
+
+# Stop Postgres but keep its data:
+docker compose stop
+
+# Stop and remove the container (data volume persists):
+docker compose down
+
+# Also wipe all Postgres data (start completely fresh):
+docker compose down -v
+
+# Reset just the schema/data without touching Docker (re-applies migrations, then re-seeds):
+cd server && npx prisma migrate reset
+```
+
+### Troubleshooting
+
+| Symptom | Likely cause / fix |
+|---|---|
+| Backend logs `Missing required environment variable(s): ...` and exits | `server/.env` wasn't created from `.env.example`, or `JWT_SECRET` is still blank. |
+| `npx prisma migrate dev` fails to connect | Postgres isn't up yet — run `docker compose ps` and `docker compose up -d`; confirm `DATABASE_URL` in `server/.env` still points at port `5433`. |
+| Frontend loads but the feed spins forever / requests fail in the browser console | Backend isn't running, or `CORS_ORIGIN` in `server/.env` doesn't match the port Vite actually started on (check the frontend terminal's `Local:` URL). |
+| `Error: listen EADDRINUSE` on `4000` or `5174` | Something else is already using that port — stop it, or for the frontend just let Vite pick the next free port and update `CORS_ORIGIN` / `VITE_API_BASE_URL` to match. |
+| `docker compose up -d` fails with a port conflict on `5433` | Another Postgres instance is already bound to `5433` — stop it, or change the host port mapping in `docker-compose.yml` and `DATABASE_URL` together. |
 
 ## Environment variables
 
@@ -120,10 +187,26 @@ With the server running, open **`http://localhost:4000/api-docs`** for the full 
 Log in as any of them, or skip the seed and click **Register** to create your own account — either way you land in the same place:
 
 - **The feed is global, not per-user.** Every logged-in (or logged-out) visitor sees the same ranked list of *all* posts from *all* authors — there's no "your posts" view. Logging in doesn't change what's visible, only what you can do: react, comment, create a post, and edit your own profile. Logged-out visitors can browse the feed and post detail read-only ("Log in to react").
-- Reactions are one-per-user-per-target (post or comment) — the UI reflects your own like/dislike state on things you've already reacted to, but everyone sees the same aggregate `likeCount`/`dislikeCount`/`commentCount` regardless of who's logged in.
+- Reactions are one-per-user-per-target (post or comment), enforced by the backend — but the highlighted like/dislike button state is local UI state only (not fetched from the server), so it resets on page reload/navigation even though your underlying reaction is still recorded. Everyone sees the same aggregate `likeCount`/`dislikeCount`/`commentCount` regardless of who's logged in.
 - A freshly registered account starts with an empty profile (no skills, no experience, no posts) — those are edited from the profile page.
 
 If you skip `prisma:seed` entirely, the database starts empty and the feed has nothing in it until someone creates a post.
+
+### Step-by-step feature walkthrough
+
+With both servers running and the DB seeded:
+
+1. **Browse the feed (logged out).** Open `http://localhost:5174` — you'll see the ranked "TOP POSTS" list with like/dislike/comment counts. Reaction buttons are disabled and read "Log in to react".
+2. **Log in.** Click **Login** (top right), enter one of the demo emails/`Password123!` from the table above. The navbar swaps to **New post / \<Your name\> / Logout**.
+3. **Open a post.** Click any post title to see its full body, reaction counts, and threaded comments.
+4. **React.** Click the like/dislike arrows on the post (or on any comment) — the count updates immediately; clicking your own active reaction again removes it, clicking the other one switches it (one reaction per user per target). Note the highlighted state won't survive a page reload (see note below), though the reaction itself is still recorded.
+5. **Comment.** Type in "Add a comment" and click **Post comment** — it appears at the bottom of the thread. Click **Reply** under an existing comment to add a threaded reply.
+6. **Create a post.** Click **New post** in the navbar, fill in Title/Body, submit — you're taken to the new post, and it appears in the feed ranked by the formula below.
+7. **Edit your profile.** Click your name in the navbar to open your profile: add/remove skills via the "Add a skill" input, and add a work experience entry (title, company, dates, description) via **+ Add experience**; existing entries have **Edit**/**Delete**.
+8. **View someone else's profile.** Click any other author's name (e.g. from a post) to see their profile read-only — skill/experience editing controls only appear on your own profile.
+9. **Log out.** Click **Logout** — you're returned to the logged-out feed view; everything you created remains visible to everyone.
+
+You can also drive the same flows directly against the API via Swagger (see below) instead of the UI.
 
 ## Ranking formula
 
@@ -147,4 +230,5 @@ This project was built with Claude Code, following a spec-driven workflow (PRD �
 - **Ranking is sorted in application code, not via a SQL `ORDER BY` expression or materialized view.** Adequate at this dataset size; would need revisiting if post volume grew large. See `docs/adr/0005-ranking-computed-at-read-time.md`.
 - **Auth is access-token-only — no refresh token flow.** A single JWT is issued on register/login with a relatively long expiry (`1d` by default) so a reviewer's session doesn't expire mid-review. No silent refresh, no token rotation. See `docs/adr/0007-auth-jwt-no-refresh-this-pass.md`.
 - **Pagination is simple `page`/`limit` query params**, not cursor-based or infinite-scroll.
+- **The reaction buttons' highlighted (active) state is local component state, not fetched from the server.** The one-reaction-per-user-per-target rule is enforced correctly server-side, but the UI doesn't know which reaction you already made until you click again in the same session — it resets on page reload or navigation.
 - Deferred out of scope for this pass (see `docs/PRD.md` section 6): Jest/unit tests for backend services, optimistic reaction updates, search/filter, markdown rendering in posts.
