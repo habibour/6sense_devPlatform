@@ -48,10 +48,14 @@ model Experience {
 }
 
 model Post {
-  id           String    @id @default(uuid())
-  authorId     String
-  title        String
-  body         String
+  id       String @id @default(uuid())
+  authorId String
+  title    String
+  body     String
+  // Denormalized counters, updated transactionally alongside the write that changes
+  // them (see reactions.service.js, comments.service.js) rather than computed with a
+  // COUNT() join on every read — see ADR 0005 for the read-time ranking rationale
+  // this feeds into.
   likeCount    Int       @default(0)
   dislikeCount Int       @default(0)
   commentCount Int       @default(0)
@@ -75,8 +79,12 @@ model Comment {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author  User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  // Self-relation for threaded replies: a comment optionally points at its parent
+  // comment (same model), and the named relation ("CommentReplies") is what lets
+  // Prisma tell "the post this comment belongs to" and "the comment this is a reply
+  // to" apart, since both are otherwise just Comment-to-Comment/Post relations.
   parent  Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
   replies Comment[] @relation("CommentReplies")
 
@@ -94,6 +102,10 @@ enum ReactionType {
   DISLIKE
 }
 
+// targetType/targetId is a polymorphic reference to either a Post or a Comment, with
+// no DB-level foreign key on targetId — Prisma/relational schemas can't express a
+// single column pointing at rows in either of two different tables. Target existence
+// is checked in application code instead (reactions.service.js); see ADR 0004.
 model Reaction {
   id         String       @id @default(uuid())
   userId     String
@@ -103,6 +115,8 @@ model Reaction {
   createdAt  DateTime     @default(now())
   user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // DB-enforced: one reaction per user per target, regardless of type — switching
+  // from LIKE to DISLIKE updates this same row rather than adding a second one.
   @@unique([userId, targetType, targetId])
   @@index([targetType, targetId])
 }

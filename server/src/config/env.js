@@ -8,6 +8,8 @@ const REQUIRED_VARS = [
   "CORS_ORIGIN",
 ];
 
+// Fails fast at boot rather than letting a missing var surface later as a cryptic
+// runtime error (e.g. a silently-undefined JWT_SECRET signing tokens with "undefined").
 function loadEnv() {
   const missing = REQUIRED_VARS.filter((key) => !process.env[key]);
   if (missing.length > 0) {

@@ -1,6 +1,10 @@
 const swaggerJsdoc = require("swagger-jsdoc");
 const path = require("path");
 
+// The actual per-endpoint documentation lives as JSDoc `@swagger` comment blocks
+// inside each routes/*.routes.js file (colocated with the route it describes,
+// so it's harder to let it drift), not here — this just declares the shared
+// OpenAPI skeleton (info, auth scheme, envelope schemas) and where to scan for them.
 const swaggerSpec = swaggerJsdoc({
   definition: {
     openapi: "3.0.0",

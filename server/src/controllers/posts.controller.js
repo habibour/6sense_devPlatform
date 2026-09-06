@@ -2,6 +2,8 @@ const postsService = require("../services/posts.service");
 const { createPostSchema, listPostsQuerySchema } = require("../validators/post.validator");
 const { sendSuccess } = require("../utils/apiResponse");
 
+// Thin by design, same as every controller in this codebase — see auth.controller.js.
+
 async function create(req, res) {
   const data = createPostSchema.parse(req.body);
   const post = await postsService.createPost(req.user.id, data);

@@ -1,6 +1,9 @@
 const { prisma } = require("../database/prisma");
 const { ApiError } = require("../utils/ApiError");
 
+// targetType/targetId is a polymorphic reference (Post or Comment) with no DB-level FK
+// — Prisma can't express a single column pointing at either of two tables — so
+// existence is checked here in the service layer instead (see ADR 0004).
 function targetDelegate(targetType) {
   return targetType === "POST" ? prisma.post : prisma.comment;
 }
@@ -41,6 +44,9 @@ async function upsertReaction(userId, { targetType, targetId, type }) {
     return existing;
   }
 
+  // Switching LIKE<->DISLIKE decrements the old counter and increments the new one in
+  // one transaction, so a concurrent read never observes a target with both counters
+  // reflecting the reaction, or neither.
   const [reaction] = await prisma.$transaction([
     prisma.reaction.update({ where: { id: existing.id }, data: { type } }),
     delegate.update({

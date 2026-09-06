@@ -79,6 +79,8 @@ router.get("/", asyncHandler(postsController.list));
  */
 router.get("/:id", asyncHandler(postsController.getById));
 
+// Comments are nested under their post's id rather than a top-level /comments
+// resource — every comment operation the API exposes is scoped to "comments on post X."
 router.use("/:id/comments", commentsRoutes);
 
 module.exports = router;

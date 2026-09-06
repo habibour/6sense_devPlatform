@@ -7,6 +7,8 @@ const {
 } = require("../validators/profile.validator");
 const { sendSuccess } = require("../utils/apiResponse");
 
+// Thin by design, same as every controller in this codebase — see auth.controller.js.
+
 async function getMe(req, res) {
   const user = await usersService.getOwnProfile(req.user.id);
   sendSuccess(res, user);

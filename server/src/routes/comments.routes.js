@@ -3,6 +3,9 @@ const commentsController = require("../controllers/comments.controller");
 const { requireAuth } = require("../middlewares/auth");
 const { asyncHandler } = require("../middlewares/asyncHandler");
 
+// mergeParams: true is required because this router is mounted at /posts/:id/comments
+// in posts.routes.js — without it, Express sub-routers don't inherit the parent's
+// :id, and req.params.id would be undefined here.
 const router = Router({ mergeParams: true });
 
 /**

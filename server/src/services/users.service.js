@@ -1,6 +1,9 @@
 const { prisma } = require("../database/prisma");
 const { ApiError } = require("../utils/ApiError");
 
+// An explicit allow-list (rather than an exclude-list) for viewing *someone else's*
+// profile, so a new field added to User later (email, passwordHash) is private by
+// default instead of automatically leaking through this endpoint.
 const PUBLIC_SELECT = {
   id: true,
   name: true,
@@ -36,6 +39,9 @@ async function updateProfile(userId, data) {
   return publicUser;
 }
 
+// The client sends the full desired skill list, not a single add/remove — so the
+// simplest correct implementation is "replace everything" (delete then recreate)
+// inside one transaction, rather than diffing old vs. new server-side.
 async function setSkills(userId, skills) {
   const uniqueSkills = [...new Set(skills)];
 
@@ -53,6 +59,9 @@ async function addExperience(userId, data) {
   return prisma.experience.create({ data: { ...data, userId } });
 }
 
+// Returns 404 (not 403) for "exists but belongs to someone else" — same response as
+// "doesn't exist at all," so a caller can't use this endpoint to probe which
+// experience ids exist for other users.
 async function assertOwnedExperience(userId, experienceId) {
   const experience = await prisma.experience.findUnique({ where: { id: experienceId } });
   if (!experience || experience.userId !== userId) {

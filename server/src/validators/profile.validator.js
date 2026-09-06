@@ -17,6 +17,8 @@ const experienceSchema = z.object({
   description: z.string().optional(),
 });
 
+// .partial() reuses the create schema's field rules for PATCH-style updates instead
+// of retyping every field as optional by hand.
 const updateExperienceSchema = experienceSchema.partial();
 
 module.exports = {

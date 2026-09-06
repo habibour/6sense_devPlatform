@@ -12,11 +12,17 @@ async function createComment(postId, authorId, { body, parentCommentId }) {
     if (!parent) {
       throw new ApiError(404, "Parent comment not found");
     }
+    // Guards against a client passing a real but mismatched parentCommentId — e.g. a
+    // stale reply form left open while navigating to a different post — which would
+    // otherwise silently thread a reply onto the wrong post's comment tree.
     if (parent.postId !== postId) {
       throw new ApiError(400, "Parent comment belongs to a different post");
     }
   }
 
+  // Comment creation and the post's denormalized commentCount must move together —
+  // an untransacted pair here could leave the counter permanently out of sync with
+  // reality if the process crashed between the two writes.
   const [comment] = await prisma.$transaction([
     prisma.comment.create({
       data: { postId, authorId, body, parentCommentId: parentCommentId ?? null },

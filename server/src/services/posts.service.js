@@ -16,6 +16,9 @@ async function getPostById(id) {
   return { ...post, score: computeScore(post.likeCount, post.dislikeCount, post.commentCount) };
 }
 
+// Fetches every post and ranks/paginates in JS rather than pushing the score
+// computation and ORDER BY into SQL (see ADR 0005) — simpler at this project's scale,
+// but means this whole function's cost grows with total post count, not page size.
 async function listPosts({ page, limit }) {
   const posts = await prisma.post.findMany();
 
@@ -25,6 +28,8 @@ async function listPosts({ page, limit }) {
       score: computeScore(post.likeCount, post.dislikeCount, post.commentCount),
     }))
     .sort((a, b) => {
+      // Ties (equal score) break by newest first, so two equally-ranked posts don't
+      // otherwise sort in undefined/insertion order.
       if (b.score !== a.score) return b.score - a.score;
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
