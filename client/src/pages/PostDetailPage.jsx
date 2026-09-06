@@ -3,6 +3,7 @@ import { ErrorBanner } from '../components/common/ErrorBanner'
 import { LoadingSpinner } from '../components/common/LoadingSpinner'
 import { CommentForm } from '../components/comments/CommentForm'
 import { CommentThread } from '../components/comments/CommentThread'
+import { ReactionButtons } from '../components/reactions/ReactionButtons'
 import { useComments } from '../hooks/useComments'
 import { usePost } from '../hooks/usePosts'
 import { useUser } from '../hooks/useProfile'
@@ -60,19 +61,14 @@ export default function PostDetailPage() {
 
       <p className="text-[15px] leading-relaxed text-slate-800 whitespace-pre-wrap mb-6">{post.data.body}</p>
 
-      <div className="flex items-center gap-4 pt-4 border-t border-slate-200 mb-8">
-        <span className="inline-flex items-center gap-1.5 text-sm text-emerald-600 font-medium">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 19V5M5 12l7-7 7 7" />
-          </svg>
-          <span className="font-mono">{post.data.likeCount}</span>
-        </span>
-        <span className="inline-flex items-center gap-1.5 text-sm text-red-600 font-medium">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 5v14M19 12l-7 7-7-7" />
-          </svg>
-          <span className="font-mono">{post.data.dislikeCount}</span>
-        </span>
+      <div className="pt-4 border-t border-slate-200 mb-8">
+        <ReactionButtons
+          targetType="POST"
+          targetId={id}
+          likeCount={post.data.likeCount}
+          dislikeCount={post.data.dislikeCount}
+          invalidateKeys={[['posts']]}
+        />
       </div>
 
       <div className="mb-6">
