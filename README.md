@@ -18,6 +18,16 @@ A developer community app — posts, threaded comments, like/dislike reactions, 
 **New post**
 ![New post](docs/screenshots/new-post.jpg)
 
+## Live Demo
+
+**Live app:** _add the deployed frontend URL here once created (e.g. `https://sixsense-devplatform.onrender.com`)_
+
+The backend runs on Render's free tier and the database on Neon's free tier. The backend spins down after 15 minutes of inactivity, so **the first request may take 30-60 seconds** while it wakes back up — please be patient on first load.
+
+Try it:
+- Browse the feed instantly — it's pre-seeded with 6 demo users, 16 posts, comments, and reactions (same data shown in the screenshots below).
+- Log in as any seeded demo user (see the [Testing the app](#testing-the-app) table for emails; all of them share the password `Password123!`), or register your own account — either way you can post, comment, and react for real. See [Deployment](#deployment) for how this is hosted and how to reproduce it.
+
 ## Tech stack
 
 | Layer | Choice |
@@ -226,6 +236,31 @@ cd server && npx prisma migrate reset
 | Variable | Description |
 |---|---|
 | `VITE_API_BASE_URL` | Base URL of the backend API (e.g. `http://localhost:4000/api`) |
+
+## Deployment
+
+The [Live Demo](#live-demo) above is deployed for free on Render (backend Web Service + frontend Static Site) and Neon (Postgres). See `docs/adr/0010-deployment-platform.md` for the reasoning behind this choice, including the accepted cold-start tradeoff and why the seed script is never run automatically. To reproduce:
+
+1. **Database** — create a free [Neon](https://neon.tech) Postgres project; copy its connection string (includes `?sslmode=require`).
+2. **Backend** — Render Web Service, root directory `server`:
+   - Build Command: `npm install && npx prisma generate && npx prisma migrate deploy`
+   - Start Command: `npm start`
+   - Env vars: `DATABASE_URL` (the Neon string), `JWT_SECRET` (a long random string, e.g. `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`), `JWT_EXPIRES_IN=1d`, `CORS_ORIGIN` (set to the frontend's URL once known — see step 4; a placeholder works until then). Don't set `PORT` manually — Render injects it.
+3. **Seed the database once, manually, from your machine** (not via Render, which has no Shell access on the free tier):
+   ```bash
+   cd server
+   DATABASE_URL="<neon-connection-string>" npx prisma migrate deploy
+   DATABASE_URL="<neon-connection-string>" node prisma/seed.js
+   ```
+   This is destructive on the target database (wipes and recreates the demo data) — run it exactly once against a fresh Neon database. After that, real visitor registrations/posts/comments accumulate on top of it; the seed script is never run again or wired into any deploy step.
+4. **Frontend** — Render Static Site, root directory `client`:
+   - Build Command: `npm install && npm run build`
+   - Publish Directory: `dist`
+   - Env var: `VITE_API_BASE_URL=https://<backend-service-name>.onrender.com/api` — set this **before** the first build, since it's baked into the bundle at build time (see `client/src/api/client.js`).
+   - SPA routing: `client/public/_redirects` (already in this repo) containing `/*    /index.html   200`, so React Router's client-side routes don't 404 on a direct load or refresh.
+5. **Close the CORS loop** — once the frontend's Render URL is known, update the backend's `CORS_ORIGIN` env var to that exact URL (no trailing slash) and let Render redeploy the backend.
+
+Optional: point a free uptime monitor (e.g. [UptimeRobot](https://uptimerobot.com) or [cron-job.org](https://cron-job.org)) at `https://<backend-service-name>.onrender.com/health` every ~10 minutes to reduce how often visitors hit the cold-start delay. Not required — the app works fine without it, just with an occasional 30-60s first load.
 
 ## API docs (Swagger)
 
