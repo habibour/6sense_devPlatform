@@ -58,7 +58,7 @@ Deeper rationale for each architectural decision is in `docs/adr/000N-*.md`; wha
 
 ### Prerequisites
 
-- **Docker Desktop** (or any Docker Engine + Compose v2) — running before step 1. Check with `docker --version` and `docker compose version`.
+- **Docker Desktop** (or any Docker Engine + Compose v2) — running before step 1. Check with `docker --version` and `docker compose version`. **No Docker?** Skip step 2 and use [an alternative Postgres](#no-docker-alternative-ways-to-run-postgres) instead — Docker is only used to run Postgres, nothing else in this project needs it.
 - **Node.js 18+** and **npm** — check with `node -v` and `npm -v`.
 - **git**.
 - Ports **5433** (Postgres), **4000** (API), and **5174** (Vite dev server) free on your machine. If one is taken, see [Troubleshooting](#troubleshooting) below.
@@ -77,6 +77,34 @@ docker compose up -d
 ```
 
 This starts a single `postgres:16-alpine` container (`dev_community_db`) on host port **5433**, with a named volume (`pgdata`) so data survives container restarts. Verify it's up with `docker compose ps` — `STATUS` should say `Up`. No `.env` file is needed for this step; `docker-compose.yml` has working defaults (`devcommunity`/`devcommunity`/`devcommunity`) that already match `server/.env.example`.
+
+#### No Docker? Alternative ways to run Postgres
+
+The app only needs *a* reachable Postgres 14+ database — it doesn't care whether it came from Docker. Skip `docker compose up -d` and pick one:
+
+**Option A — free cloud Postgres (fastest, no install at all).** Sign up for a free instance on [Neon](https://neon.tech), [Supabase](https://supabase.com), or [Railway](https://railway.app), create a database, and copy the connection string it gives you. Most of these require `?sslmode=require` on the URL.
+
+**Option B — install Postgres locally.**
+- macOS: `brew install postgresql@16 && brew services start postgresql@16`
+- Ubuntu/Debian: `sudo apt install postgresql && sudo systemctl start postgresql`
+- Windows: the installer from [postgresql.org/download](https://www.postgresql.org/download/windows/)
+
+Then create a role and database matching the app's defaults (or use your own and adjust `DATABASE_URL` accordingly):
+
+```bash
+createuser -s devcommunity          # -s = superuser, simplest for local dev
+createdb -O devcommunity devcommunity
+psql -c "ALTER USER devcommunity WITH PASSWORD 'devcommunity';"
+```
+
+**Either way**, once you have a connection string, set it directly in `server/.env` after copying `.env.example` in step 3 below — e.g.:
+
+```
+DATABASE_URL=postgresql://devcommunity:devcommunity@localhost:5432/devcommunity   # local install, default port
+# or the connection string your cloud provider gave you
+```
+
+Everything from step 3 onward (`npx prisma migrate dev`, seeding, `npm run dev`) works identically regardless of where Postgres is actually running.
 
 ### Step 3 — backend (Express API)
 
