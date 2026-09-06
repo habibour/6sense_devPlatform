@@ -15,6 +15,8 @@ export function useCreateComment(postId) {
   return useMutation({
     mutationFn: ({ body, parentCommentId }) => createComment(postId, { body, parentCommentId }),
     onSuccess: () => {
+      // Both caches need invalidating: the comment list obviously changed, and the
+      // post's own commentCount (denormalized on Post, used for ranking) is stale too.
       queryClient.invalidateQueries({ queryKey: ['comments', postId] })
       queryClient.invalidateQueries({ queryKey: ['posts', postId] })
     },

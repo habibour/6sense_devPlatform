@@ -1,3 +1,6 @@
+// Months/years use a flat 30/365-day approximation rather than calendar-aware math —
+// timestamps here are relative "how long ago" labels, not dates anyone acts on, so the
+// few days of drift at larger scales isn't worth a date library dependency for.
 export function formatRelativeTime(dateString) {
   const date = new Date(dateString)
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000)

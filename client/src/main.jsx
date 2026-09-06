@@ -6,6 +6,9 @@ import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import './index.css'
 
+// One QueryClient for the app's lifetime — created outside the component tree so it
+// survives re-renders of main.jsx (there are none in practice, but this is the
+// standard TanStack Query setup and avoids accidentally creating a new cache on remount).
 const queryClient = new QueryClient()
 
 createRoot(document.getElementById('root')).render(

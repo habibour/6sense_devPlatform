@@ -3,6 +3,8 @@ import { createPost, getPost, listPosts } from '../api/posts.api'
 
 export function usePostsList(params = {}) {
   return useQuery({
+    // params in the key means different page/limit combos get independent cache
+    // entries instead of one shared 'posts' entry silently showing stale data.
     queryKey: ['posts', params],
     queryFn: () => listPosts(params),
   })

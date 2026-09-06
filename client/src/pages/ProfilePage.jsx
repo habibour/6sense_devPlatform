@@ -16,7 +16,7 @@ export default function ProfilePage() {
   if (profile.isPending) {
     return (
       <PageContainer>
-        <div className="flex justify-center text-slate-400">
+        <div className="flex justify-center text-chrome-400">
           <LoadingSpinner />
         </div>
       </PageContainer>
@@ -37,37 +37,45 @@ export default function ProfilePage() {
   const data = profile.data
 
   return (
-    <PageContainer>
-      <div className="flex items-center gap-3.5 mb-4">
-        <div className="w-14 h-14 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg flex-shrink-0">
-          {data.name.slice(0, 2).toUpperCase()}
-        </div>
-        <div>
-          <div className="text-lg font-bold text-slate-900">{data.name}</div>
-          <div className="font-mono text-xs text-slate-400 mt-0.5">
-            joined {new Date(data.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+    // Bumped to max-w-3xl locally (not via PageContainer's default) so login/register/
+    // new-post stay at their narrower width.
+    <div className="max-w-3xl mx-auto px-6 py-8">
+      <div className="bg-chrome-0 border border-chrome-200 rounded-xl p-5 mb-6">
+        <div className="flex items-center gap-3.5">
+          <div className="w-16 h-16 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-xl flex-shrink-0">
+            {data.name.slice(0, 2).toUpperCase()}
+          </div>
+          <div>
+            <div className="text-lg font-bold text-chrome-900">{data.name}</div>
+            <div className="font-mono text-xs text-chrome-400 mt-0.5">
+              joined {new Date(data.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+            </div>
           </div>
         </div>
+
+        {data.bio && <p className="text-sm text-chrome-700 leading-relaxed mt-4">{data.bio}</p>}
       </div>
 
-      {data.bio && <p className="text-sm text-slate-700 leading-relaxed mb-6">{data.bio}</p>}
+      <div className="bg-chrome-0 border border-chrome-200 rounded-xl p-5 mb-6">
+        <div className="text-xs font-semibold uppercase tracking-wide text-chrome-500 mb-2.5">Skills</div>
+        {isOwn ? (
+          <SkillsEditor userId={userId} skills={data.skills} />
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {data.skills.length === 0 && <span className="text-sm text-chrome-400">No skills listed.</span>}
+            {data.skills.map((s) => (
+              <span key={s.id} className="bg-brand-50 text-brand-700 text-xs font-medium px-2.5 py-1 rounded-full">
+                {s.name}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
 
-      <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2.5 mt-6">Skills</div>
-      {isOwn ? (
-        <SkillsEditor userId={userId} skills={data.skills} />
-      ) : (
-        <div className="flex flex-wrap gap-2">
-          {data.skills.length === 0 && <span className="text-sm text-slate-400">No skills listed.</span>}
-          {data.skills.map((s) => (
-            <span key={s.id} className="bg-indigo-50 text-indigo-700 text-xs font-medium px-2.5 py-1 rounded-full">
-              {s.name}
-            </span>
-          ))}
-        </div>
-      )}
-
-      <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3 mt-8">Experience</div>
-      <ExperienceList userId={userId} experiences={data.experiences} editable={isOwn} />
-    </PageContainer>
+      <div className="bg-chrome-0 border border-chrome-200 rounded-xl p-5">
+        <div className="text-xs font-semibold uppercase tracking-wide text-chrome-500 mb-3">Experience</div>
+        <ExperienceList userId={userId} experiences={data.experiences} editable={isOwn} />
+      </div>
+    </div>
   )
 }

@@ -12,6 +12,11 @@ export function useMyReaction({ targetType, targetId, enabled }) {
 export function useReact({ targetType, targetId, invalidateKeys }) {
   const queryClient = useQueryClient()
 
+  // invalidateKeys is caller-supplied because the same reaction affects different
+  // cached queries depending on where it's rendered from: a post-card reaction
+  // invalidates the ['posts'] list, a comment reaction invalidates ['comments', postId]
+  // — this hook has no way to know which without the caller telling it. myReaction
+  // itself is always invalidated here since every reaction affects exactly one.
   const invalidate = () => {
     invalidateKeys.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }))
     queryClient.invalidateQueries({ queryKey: ['myReaction', targetType, targetId] })

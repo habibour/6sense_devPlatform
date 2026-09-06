@@ -11,7 +11,9 @@ import ProtectedRoute from './routes/ProtectedRoute'
 
 function App() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-chrome-50">
+      {/* Navbar sits outside <Routes> so it persists across navigation instead of
+          remounting per page. */}
       <Navbar />
       <Routes>
         <Route path="/" element={<FeedPage />} />

@@ -9,13 +9,17 @@ function formatDateRange(from, to) {
 
 export function ExperienceList({ userId, experiences, editable }) {
   const { add, update, remove } = useExperiences(userId)
+  // editingId and adding are mutually exclusive in practice (the UI only ever shows one
+  // inline form at a time) but are tracked as two separate pieces of state rather than
+  // one union, since "editing entry X" and "adding a new one" render in different places
+  // in the list.
   const [editingId, setEditingId] = useState(null)
   const [adding, setAdding] = useState(false)
 
   return (
-    <div className="flex flex-col gap-5 border-l-2 border-slate-200 pl-4">
+    <div className="flex flex-col gap-5 border-l-2 border-brand-100 pl-4">
       {experiences.length === 0 && !adding && (
-        <p className="text-sm text-slate-400">No experience added yet.</p>
+        <p className="text-sm text-chrome-400">No experience added yet.</p>
       )}
 
       {experiences.map((exp) =>
@@ -32,11 +36,11 @@ export function ExperienceList({ userId, experiences, editable }) {
         ) : (
           <div key={exp.id} className="flex justify-between items-start gap-3">
             <div>
-              <div className="font-semibold text-sm text-slate-900">{exp.title}</div>
-              <div className="text-sm text-slate-600">{exp.company}</div>
-              <div className="font-mono text-xs text-slate-400 mt-0.5">{formatDateRange(exp.from, exp.to)}</div>
+              <div className="font-semibold text-sm text-chrome-900">{exp.title}</div>
+              <div className="text-sm text-chrome-600">{exp.company}</div>
+              <div className="font-mono text-xs text-chrome-400 mt-0.5">{formatDateRange(exp.from, exp.to)}</div>
               {exp.description && (
-                <p className="text-sm text-slate-700 mt-1.5 leading-relaxed">{exp.description}</p>
+                <p className="text-sm text-chrome-700 mt-1.5 leading-relaxed">{exp.description}</p>
               )}
             </div>
             {editable && (
@@ -44,7 +48,7 @@ export function ExperienceList({ userId, experiences, editable }) {
                 <button
                   type="button"
                   onClick={() => setEditingId(exp.id)}
-                  className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                  className="text-xs font-medium text-brand-600 hover:text-brand-700"
                 >
                   Edit
                 </button>
@@ -73,7 +77,7 @@ export function ExperienceList({ userId, experiences, editable }) {
         <button
           type="button"
           onClick={() => setAdding(true)}
-          className="border border-dashed border-slate-300 rounded-lg py-2.5 text-sm font-medium text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50"
+          className="border border-dashed border-chrome-300 rounded-lg py-2.5 text-sm font-medium text-brand-600 hover:border-brand-400 hover:bg-brand-50"
         >
           + Add experience
         </button>

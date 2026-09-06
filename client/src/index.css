@@ -1,5 +1,43 @@
 @import "tailwindcss";
 
+@theme {
+  /* Brand teal ramp, anchored on the 5 palette values the product spec gives us */
+  --color-brand-50: #eaf5f5;
+  --color-brand-100: #b2d8d8;
+  --color-brand-200: #8fc9c9;
+  --color-brand-300: #66b2b2;
+  --color-brand-400: #33a0a0;
+  --color-brand-500: #008080;
+  --color-brand-600: #006666;
+  --color-brand-700: #004c4c;
+  --color-brand-800: #003939;
+  --color-brand-900: #002626;
+
+  /* Neutral chrome, tinted toward brand rather than stock slate/gray, for Reddit-style borders/backgrounds */
+  --color-chrome-0: #ffffff;
+  --color-chrome-50: #f7f9f9;
+  --color-chrome-100: #eef2f2;
+  --color-chrome-200: #dfe6e6;
+  --color-chrome-300: #c7d1d1;
+  --color-chrome-400: #9fadad;
+  --color-chrome-500: #71827f;
+  --color-chrome-600: #52625f;
+  --color-chrome-700: #3a4544;
+  --color-chrome-800: #232b2a;
+  --color-chrome-900: #141918;
+
+  /* Reaction accents kept separate from the brand ramp: "like" needs a universally
+     recognizable red regardless of brand color, and pairing it with a teal (not a
+     second red) for "dislike" keeps the two states colorblind-distinguishable. */
+  --color-like: #ff4500;
+  --color-dislike: #006666;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
 body {
   margin: 0;
+  background-color: var(--color-chrome-50);
+  font-family: var(--font-sans);
 }

@@ -26,6 +26,9 @@ export function useSkills(userId) {
 
 export function useExperiences(userId) {
   const queryClient = useQueryClient()
+  // add/update/remove all just refetch the whole profile rather than patching the
+  // experiences array in the cache — the profile payload is small and this avoids
+  // three separate cache-shape-editing code paths for a rarely-changed list.
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['users', userId] })
 
   const add = useMutation({
