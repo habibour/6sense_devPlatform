@@ -19,6 +19,7 @@ A developer community app — posts, threaded comments, like/dislike reactions, 
 | Database | PostgreSQL 16, run locally via Docker Compose |
 | Backend | Node.js + Express, plain JavaScript (CommonJS), Prisma ORM, layered `routes → controllers → services` |
 | Frontend | Vite + React SPA, JavaScript/JSX, React Router, TanStack Query, Tailwind CSS |
+| Testing | Jest unit tests for the backend services layer (see [Tests](#tests)) |
 
 See `docs/adr/` for the reasoning behind each of these choices.
 
