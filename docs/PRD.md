@@ -44,8 +44,9 @@ Mirrors the assignment's evaluation rubric (section 9): a working backend with c
 Explicitly deferred per the assignment's bonus section and the project's own scoping decision to prioritize a complete core over a partial bonus set:
 
 - Refresh token flow (access-token-only auth for now; see `adr/0007-auth-jwt-no-refresh-this-pass.md`)
-- Jest/unit tests for backend services
 - Extra UX: optimistic reaction updates, pagination beyond simple page/limit, search/filter, markdown rendering in posts
+
+Jest unit tests for the backend services layer were picked up after all — see `server/src/services/__tests__/` and `docs/adr/0008-jest-service-unit-tests.md`.
 
 These may be picked up in a later pass once the core is solid, per the assignment's own guidance that "a clean core FE+BE beats unfinished bonus work."
 

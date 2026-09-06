@@ -166,6 +166,7 @@ All the commands above work as-is in PowerShell (`cp`, `npm`, `npx` are all avai
 | `server/` | `npm run prisma:migrate` | Create/apply a migration from `schema.prisma` changes |
 | `server/` | `npm run prisma:seed` | Wipe and repopulate the DB with demo data (also runs via `npx prisma db seed` / `prisma migrate reset`) |
 | `server/` | `npm run lint` | ESLint over the backend |
+| `server/` | `npm test` | Jest unit tests for the services layer (see [Tests](#tests)) |
 | `client/` | `npm run dev` | Start the Vite dev server |
 | `client/` | `npm run build` | Production build to `client/dist` |
 | `client/` | `npm run preview` | Serve the production build locally |
@@ -221,6 +222,15 @@ cd server && npx prisma migrate reset
 
 With the server running, open **`http://localhost:4000/api-docs`** for the full OpenAPI 3.0 spec, grouped by resource (Users, Reactions, Posts, Comments, Auth). Use the **Authorize** button with a JWT from `POST /auth/login` or `POST /auth/register` to try authenticated endpoints directly from the UI.
 
+## Tests
+
+```bash
+cd server
+npm test
+```
+
+35 Jest tests across 6 suites cover the `services/` layer's business logic — ranking (score computation, tie-breaks, pagination), the reaction create/no-op/switch/remove state machine and its counter updates, comment creation/threading validation, register/login (real password hashing + JWT round-trip), and profile skill dedup + experience ownership checks. Only the Prisma client is mocked (via `server/tests/mockPrisma.js`); no real database or `.env` file is needed — `npm test` works right after `npm install` on a clean checkout. Routes/controllers are thin wiring with no logic of their own (see `CLAUDE.md`'s backend layering), so they're covered by manual/Swagger testing instead. See `docs/adr/0008-jest-service-unit-tests.md` for the full rationale.
+
 ## Testing the app
 
 `npm run prisma:seed` (run once, from `server/`, after migrating) wipes and repopulates the database with 6 demo users, 6 posts, comments, and reactions — the same data shown in the screenshots above. It's safe to re-run any time; it deletes existing rows first, so only use it against your local dev database.
@@ -237,7 +247,7 @@ With the server running, open **`http://localhost:4000/api-docs`** for the full 
 Log in as any of them, or skip the seed and click **Register** to create your own account — either way you land in the same place:
 
 - **The feed is global, not per-user.** Every logged-in (or logged-out) visitor sees the same ranked list of *all* posts from *all* authors — there's no "your posts" view. Logging in doesn't change what's visible, only what you can do: react, comment, create a post, and edit your own profile. Logged-out visitors can browse the feed and post detail read-only ("Log in to react").
-- Reactions are one-per-user-per-target (post or comment), enforced by the backend — but the highlighted like/dislike button state is local UI state only (not fetched from the server), so it resets on page reload/navigation even though your underlying reaction is still recorded. Everyone sees the same aggregate `likeCount`/`dislikeCount`/`commentCount` regardless of who's logged in.
+- Reactions are one-per-user-per-target (post or comment), enforced by the backend. The like/dislike button reflects your own prior reaction (fetched via `GET /reactions/me/:targetType/:targetId`) and survives page reloads/navigation. Everyone sees the same aggregate `likeCount`/`dislikeCount`/`commentCount` regardless of who's logged in.
 - A freshly registered account starts with an empty profile (no skills, no experience, no posts) — those are edited from the profile page.
 
 If you skip `prisma:seed` entirely, the database starts empty and the feed has nothing in it until someone creates a post.
@@ -249,7 +259,7 @@ With both servers running and the DB seeded:
 1. **Browse the feed (logged out).** Open `http://localhost:5174` — you'll see the ranked "TOP POSTS" list with like/dislike/comment counts. Reaction buttons are disabled and read "Log in to react".
 2. **Log in.** Click **Login** (top right), enter one of the demo emails/`Password123!` from the table above. The navbar swaps to **New post / \<Your name\> / Logout**.
 3. **Open a post.** Click any post title to see its full body, reaction counts, and threaded comments.
-4. **React.** Click the like/dislike arrows on the post (or on any comment) — the count updates immediately; clicking your own active reaction again removes it, clicking the other one switches it (one reaction per user per target). Note the highlighted state won't survive a page reload (see note below), though the reaction itself is still recorded.
+4. **React.** Click the like/dislike arrows on the post (or on any comment) — the count updates immediately; clicking your own active reaction again removes it, clicking the other one switches it (one reaction per user per target). Reload the page — the highlight survives, since it's fetched from the server.
 5. **Comment.** Type in "Add a comment" and click **Post comment** — it appears at the bottom of the thread. Click **Reply** under an existing comment to add a threaded reply.
 6. **Create a post.** Click **New post** in the navbar, fill in Title/Body, submit — you're taken to the new post, and it appears in the feed ranked by the formula below.
 7. **Edit your profile.** Click your name in the navbar to open your profile: add/remove skills via the "Add a skill" input, and add a work experience entry (title, company, dates, description) via **+ Add experience**; existing entries have **Edit**/**Delete**.
@@ -280,5 +290,4 @@ This project was built with Claude Code, following a spec-driven workflow (PRD �
 - **Ranking is sorted in application code, not via a SQL `ORDER BY` expression or materialized view.** Adequate at this dataset size; would need revisiting if post volume grew large. See `docs/adr/0005-ranking-computed-at-read-time.md`.
 - **Auth is access-token-only — no refresh token flow.** A single JWT is issued on register/login with a relatively long expiry (`1d` by default) so a reviewer's session doesn't expire mid-review. No silent refresh, no token rotation. See `docs/adr/0007-auth-jwt-no-refresh-this-pass.md`.
 - **Pagination is simple `page`/`limit` query params**, not cursor-based or infinite-scroll.
-- **The reaction buttons' highlighted (active) state is local component state, not fetched from the server.** The one-reaction-per-user-per-target rule is enforced correctly server-side, but the UI doesn't know which reaction you already made until you click again in the same session — it resets on page reload or navigation.
-- Deferred out of scope for this pass (see `docs/PRD.md` section 6): Jest/unit tests for backend services, optimistic reaction updates, search/filter, markdown rendering in posts.
+- Deferred out of scope for this pass (see `docs/PRD.md` section 6): optimistic reaction updates, search/filter, markdown rendering in posts.
