@@ -53,7 +53,7 @@ Error:   { "success": false, "statusCode": 400, "message": "...", "errors"?: [..
 | Method | Path | Auth | Notes |
 |---|---|---|---|
 | POST | `/api/reactions` | Yes | body: `{ targetType: "POST"\|"COMMENT", targetId, type: "LIKE"\|"DISLIKE" }`. Upsert semantics — see below. |
-| DELETE | `/api/reactions/:targetType/:targetId` | Yes | removes the caller's own reaction to that target, if any |
+| DELETE | `/api/reactions/:targetType/:targetId` | Yes | removes the caller's own reaction to that target. 404 if the target doesn't exist, and 404 if the caller has no existing reaction on it (not a silent no-op) — the client is expected to know it has an active reaction before calling delete, since it just received that state from a prior create/list response. |
 
 **Acceptance**:
 - 404 if the target (post or comment) doesn't exist (service-layer check, see ADR 0004).

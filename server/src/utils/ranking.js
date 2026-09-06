@@ -1,2 +1,5 @@
-// Phase 1: computeScore(likeCount, dislikeCount, commentCount, weight) — see docs/adr/0005-ranking-computed-at-read-time.md
-module.exports = {};
+function computeScore(likeCount, dislikeCount, commentCount, weight = 2) {
+  return (likeCount - dislikeCount) + commentCount * weight;
+}
+
+module.exports = { computeScore };

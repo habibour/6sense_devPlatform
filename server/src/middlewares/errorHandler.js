@@ -10,6 +10,18 @@ function errorHandler(err, _req, res, _next) {
     });
   }
 
+  if (err && err.name === "ZodError" && Array.isArray(err.issues)) {
+    return res.status(400).json({
+      success: false,
+      statusCode: 400,
+      message: "Validation failed",
+      errors: err.issues.map((issue) => ({
+        path: issue.path.join("."),
+        message: issue.message,
+      })),
+    });
+  }
+
   console.error(err);
   return res.status(500).json({
     success: false,

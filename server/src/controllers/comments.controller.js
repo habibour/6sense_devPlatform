@@ -1,2 +1,16 @@
-// Phase 1: comments & replies controller — see docs/specs/phase-1-backend/spec.md
-module.exports = {};
+const commentsService = require("../services/comments.service");
+const { createCommentSchema } = require("../validators/comment.validator");
+const { sendSuccess } = require("../utils/apiResponse");
+
+async function create(req, res) {
+  const data = createCommentSchema.parse(req.body);
+  const comment = await commentsService.createComment(req.params.id, req.user.id, data);
+  sendSuccess(res, comment, "Comment created", 201);
+}
+
+async function list(req, res) {
+  const comments = await commentsService.listComments(req.params.id);
+  sendSuccess(res, comments);
+}
+
+module.exports = { create, list };

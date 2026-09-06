@@ -1,2 +1,16 @@
-// Phase 1: zod schema for { targetType, targetId, type } — see docs/plans/phase-1-backend/plan.md
-module.exports = {};
+const { z } = require("zod");
+
+const targetTypeParam = z.enum(["POST", "COMMENT"]);
+
+const createReactionSchema = z.object({
+  targetType: targetTypeParam,
+  targetId: z.string().min(1),
+  type: z.enum(["LIKE", "DISLIKE"]),
+});
+
+const removeReactionParamsSchema = z.object({
+  targetType: targetTypeParam,
+  targetId: z.string().min(1),
+});
+
+module.exports = { createReactionSchema, removeReactionParamsSchema };

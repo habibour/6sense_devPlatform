@@ -1,2 +1,8 @@
-// Phase 1: zod schema for comment/reply body + parentCommentId — see docs/plans/phase-1-backend/plan.md
-module.exports = {};
+const { z } = require("zod");
+
+const createCommentSchema = z.object({
+  body: z.string().min(1, "Comment body is required"),
+  parentCommentId: z.string().uuid().optional(),
+});
+
+module.exports = { createCommentSchema };
