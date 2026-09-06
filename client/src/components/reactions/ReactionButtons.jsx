@@ -1,12 +1,22 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { useReact } from '../../hooks/useReactions'
+import { useMyReaction, useReact } from '../../hooks/useReactions'
 
 export function ReactionButtons({ targetType, targetId, likeCount, dislikeCount, invalidateKeys, size = 'md' }) {
   const { user } = useAuth()
-  const [myReaction, setMyReaction] = useState(null)
+  const { data: existingReaction } = useMyReaction({ targetType, targetId, enabled: !!user })
   const { addReaction, removeReaction } = useReact({ targetType, targetId, invalidateKeys })
+
+  const [myReaction, setMyReaction] = useState(null)
+  const [syncedUser, setSyncedUser] = useState(user)
+  const [syncedReaction, setSyncedReaction] = useState(existingReaction)
+
+  if (user !== syncedUser || existingReaction !== syncedReaction) {
+    setSyncedUser(user)
+    setSyncedReaction(existingReaction)
+    setMyReaction(user && existingReaction ? existingReaction.type ?? null : null)
+  }
 
   const pending = addReaction.isPending || removeReaction.isPending
   const iconSize = size === 'sm' ? 14 : 16

@@ -7,3 +7,7 @@ export function react({ targetType, targetId, type }) {
 export function removeReaction(targetType, targetId) {
   return client.delete(`/reactions/${targetType}/${targetId}`)
 }
+
+export function getMyReaction(targetType, targetId) {
+  return client.get(`/reactions/me/${targetType}/${targetId}`)
+}

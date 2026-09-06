@@ -14,4 +14,10 @@ async function remove(req, res) {
   sendSuccess(res, null, "Reaction removed");
 }
 
-module.exports = { create, remove };
+async function getMine(req, res) {
+  const { targetType, targetId } = removeReactionParamsSchema.parse(req.params);
+  const reaction = await reactionsService.getMyReaction(req.user.id, targetType, targetId);
+  sendSuccess(res, { type: reaction?.type ?? null });
+}
+
+module.exports = { create, remove, getMine };

@@ -44,6 +44,36 @@ router.post("/", requireAuth, asyncHandler(reactionsController.create));
 
 /**
  * @swagger
+ * /reactions/me/{targetType}/{targetId}:
+ *   get:
+ *     summary: Get the caller's own reaction to a target, if any
+ *     tags: [Reactions]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: targetType
+ *         required: true
+ *         schema: { type: string, enum: [POST, COMMENT] }
+ *       - in: path
+ *         name: targetId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: "{ type: 'LIKE' | 'DISLIKE' | null }"
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/SuccessEnvelope' }
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+ */
+router.get("/me/:targetType/:targetId", requireAuth, asyncHandler(reactionsController.getMine));
+
+/**
+ * @swagger
  * /reactions/{targetType}/{targetId}:
  *   delete:
  *     summary: Remove the caller's own reaction to a target

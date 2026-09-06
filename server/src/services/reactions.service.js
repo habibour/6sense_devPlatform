@@ -54,6 +54,12 @@ async function upsertReaction(userId, { targetType, targetId, type }) {
   return reaction;
 }
 
+async function getMyReaction(userId, targetType, targetId) {
+  return prisma.reaction.findUnique({
+    where: { userId_targetType_targetId: { userId, targetType, targetId } },
+  });
+}
+
 async function removeReaction(userId, targetType, targetId) {
   await assertTargetExists(targetType, targetId);
 
@@ -75,4 +81,4 @@ async function removeReaction(userId, targetType, targetId) {
   ]);
 }
 
-module.exports = { upsertReaction, removeReaction };
+module.exports = { upsertReaction, removeReaction, getMyReaction };
