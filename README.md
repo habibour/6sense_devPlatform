@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://sixsense-devplatform-client.onrender.com/">
+    <img src="https://img.shields.io/badge/%F0%9F%94%97_LIVE_DEMO-sixsense--devplatform--client.onrender.com-14b8a6?style=for-the-badge&labelColor=134e4a" alt="Live Demo" />
+  </a>
+</p>
+
 <p align="center"><img src="client/src/assets/logo.svg" width="72" alt="DevCommunity logo" /></p>
 
 # Dev Community Platform
@@ -20,7 +26,7 @@ A developer community app — posts, threaded comments, like/dislike reactions, 
 
 ## Live Demo
 
-**Live app:** _add the deployed frontend URL here once created (e.g. `https://sixsense-devplatform.onrender.com`)_
+**Live app:** [sixsense-devplatform-client.onrender.com](https://sixsense-devplatform-client.onrender.com/) (also linked at the very top of this README).
 
 The backend runs on Render's free tier and the database on Neon's free tier. The backend spins down after 15 minutes of inactivity, so **the first request may take 30-60 seconds** while it wakes back up — please be patient on first load.
 
@@ -257,7 +263,7 @@ The [Live Demo](#live-demo) above is deployed for free on Render (backend Web Se
    - Build Command: `npm install && npm run build`
    - Publish Directory: `dist`
    - Env var: `VITE_API_BASE_URL=https://<backend-service-name>.onrender.com/api` — set this **before** the first build, since it's baked into the bundle at build time (see `client/src/api/client.js`).
-   - SPA routing: `client/public/_redirects` (already in this repo) containing `/*    /index.html   200`, so React Router's client-side routes don't 404 on a direct load or refresh.
+   - SPA routing: Render static sites don't honor a Netlify-style `_redirects` file — add a Redirect/Rewrite rule instead (Static Site → Settings → Redirects/Rewrites → Source `/*`, Destination `/index.html`, Action **Rewrite**), so React Router's client-side routes don't 404 on a direct load or refresh.
 5. **Close the CORS loop** — once the frontend's Render URL is known, update the backend's `CORS_ORIGIN` env var to that exact URL (no trailing slash) and let Render redeploy the backend.
 
 Optional: point a free uptime monitor (e.g. [UptimeRobot](https://uptimerobot.com) or [cron-job.org](https://cron-job.org)) at `https://<backend-service-name>.onrender.com/health` every ~10 minutes to reduce how often visitors hit the cold-start delay. Not required — the app works fine without it, just with an occasional 30-60s first load.
