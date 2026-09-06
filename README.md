@@ -37,7 +37,7 @@ PostgreSQL (Docker, :5433)  ←  Prisma schema.prisma (single source of truth fo
 Monorepo layout:
 
 ```
-6sense_project/
+6sense_devPlatform/
   server/             Express + JavaScript + Prisma API  (server/prisma/schema.prisma, server/prisma/seed.js, server/src/...)
   client/             Vite + React SPA (JavaScript/JSX)  (client/src/...)
   docs/               spec-driven docs: PRD, ADRs, per-phase specs and plans
@@ -67,7 +67,7 @@ Deeper rationale for each architectural decision is in `docs/adr/000N-*.md`; wha
 
 ```bash
 git clone <this-repo-url>
-cd 6sense_project
+cd 6sense_devPlatform
 ```
 
 ### Step 2 — start Postgres
@@ -106,6 +106,8 @@ DATABASE_URL=postgresql://devcommunity:devcommunity@localhost:5432/devcommunity 
 
 Everything from step 3 onward (`npx prisma migrate dev`, seeding, `npm run dev`) works identically regardless of where Postgres is actually running.
 
+**Security note:** a cloud connection string carries your database's real credentials. `server/.env` is already git-ignored (see `.gitignore`) so it won't be committed by normal use — but never paste a real connection string into a commit, issue, chat log, or anywhere else public, and rotate the database password immediately if one is ever exposed.
+
 ### Step 3 — backend (Express API)
 
 ```bash
@@ -118,6 +120,8 @@ npm run dev                # starts on http://localhost:4000, auto-restarts on f
 ```
 
 `JWT_SECRET` has no default and the server refuses to boot without it (see `src/config/env.js`) — set it to any long random string, e.g. generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. You should see `Server listening on http://localhost:4000` in the terminal once it's up; leave this terminal running.
+
+If you're just running the app rather than changing `schema.prisma`, `npx prisma migrate deploy` applies the existing migrations non-interactively (no migration-name prompt) — use that instead of `migrate dev` if you want a fully scripted setup.
 
 ### Step 4 — frontend (React SPA)
 
@@ -133,6 +137,24 @@ npm run dev                # starts on http://localhost:5174 (Vite picks the nex
 ### Step 5 — open the app
 
 Go to **http://localhost:5174** in a browser. You should see the `devcommunity` navbar and a "TOP POSTS" feed (empty if you skipped seeding — see [Testing the app](#testing-the-app)).
+
+### Windows (PowerShell) notes
+
+All the commands above work as-is in PowerShell (`cp`, `npm`, `npx` are all available), with a few native alternatives:
+
+- **Writing `.env` in one shot** instead of `cp .env.example .env` + hand-editing — useful when you already have a full connection string (e.g. from Neon/Supabase):
+  ```powershell
+  @"
+  PORT=4000
+  DATABASE_URL=<your connection string>
+  JWT_SECRET=<a long random string>
+  JWT_EXPIRES_IN=1d
+  CORS_ORIGIN=http://localhost:5174
+  "@ | Set-Content server\.env
+  "VITE_API_BASE_URL=http://localhost:4000/api" | Set-Content client\.env
+  ```
+- **`curl` equivalent** for the sanity-check in [Troubleshooting](#troubleshooting): `Invoke-WebRequest http://localhost:4000/api/posts -UseBasicParsing`.
+- If Vite doesn't bind where you expect, force it explicitly: `npm run dev -- --host localhost`.
 
 ### Available scripts
 
