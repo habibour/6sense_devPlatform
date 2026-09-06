@@ -1,0 +1,32 @@
+<svg width="720" height="140" viewBox="0 0 720 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Live demo — built and deployed end-to-end. Click to open sixsense-devplatform-client.onrender.com">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#004c4c"/>
+      <stop offset="55%" stop-color="#006666"/>
+      <stop offset="100%" stop-color="#008080"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="1" y="1" width="718" height="138" rx="22" fill="url(#bg)" stroke="#00262633" stroke-width="1"/>
+  <rect x="1" y="1" width="718" height="138" rx="22" fill="url(#sheen)"/>
+
+  <circle cx="660" cy="18" r="64" fill="#ffffff" opacity="0.045"/>
+  <circle cx="625" cy="120" r="46" fill="#ffffff" opacity="0.05"/>
+
+  <circle cx="46" cy="46" r="6" fill="#7CFFCB"/>
+  <circle cx="46" cy="46" r="6" fill="none" stroke="#7CFFCB" stroke-width="2" opacity="0.55">
+    <animate attributeName="r" values="6;15;6" dur="2.4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.55;0;0.55" dur="2.4s" repeatCount="indefinite"/>
+  </circle>
+
+  <text x="68" y="54" font-family="Segoe UI, Verdana, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#f2fbfb">🔗 Live Demo</text>
+  <text x="68" y="82" font-family="Segoe UI, Verdana, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#b2d8d8" letter-spacing="1">BUILT &amp; DEPLOYED END-TO-END</text>
+  <text x="68" y="106" font-family="Segoe UI, Verdana, Helvetica, sans-serif" font-size="13" fill="#8fc9c9">sixsense-devplatform-client.onrender.com</text>
+
+  <rect x="560" y="98" width="140" height="30" rx="15" fill="#ffffff" opacity="0.14"/>
+  <text x="630" y="118" font-family="Segoe UI, Verdana, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#eaf5f5" text-anchor="middle">Click to open ↗</text>
+</svg>

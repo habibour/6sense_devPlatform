@@ -1,10 +1,14 @@
 <p align="center">
   <a href="https://sixsense-devplatform-client.onrender.com/">
-    <img src="https://img.shields.io/badge/%F0%9F%94%97_LIVE_DEMO-sixsense--devplatform--client.onrender.com-14b8a6?style=for-the-badge&labelColor=134e4a" alt="Live Demo" />
+    <img src="docs/assets/live-demo-banner.svg" width="600" alt="Live Demo — built and deployed end-to-end. Click to open sixsense-devplatform-client.onrender.com" />
   </a>
 </p>
 
-<p align="center"><img src="client/src/assets/logo.svg" width="72" alt="DevCommunity logo" /></p>
+<p align="center">
+  <a href="https://sixsense-devplatform-client.onrender.com/">
+    <img src="client/src/assets/logo.svg" width="72" alt="DevCommunity logo — click to open the live demo" />
+  </a>
+</p>
 
 # Dev Community Platform
 
