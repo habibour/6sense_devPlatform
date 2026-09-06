@@ -7,7 +7,7 @@ Accepted
 Reactions (like/dislike) apply to both posts and comments. The suggested data model (assignment section 5) models `Reaction` with `targetType` (post | comment) and `targetId`, plus a uniqueness constraint of one reaction per user per target. Prisma (and relational schemas generally) cannot express a single foreign key column that points to rows in either of two different tables (`Post` or `Comment`) depending on a discriminator column — there is no native polymorphic FK.
 
 ## Decision
-Model `Reaction` with `targetType: TargetType` (`POST` | `COMMENT`) and `targetId: String` (no FK relation on `targetId`), plus `@@unique([userId, targetType, targetId])` to enforce one reaction per user per target at the database level. Target existence (does a post/comment with that id actually exist) is verified in `reactions.service.ts` before insert, not by a database constraint.
+Model `Reaction` with `targetType: TargetType` (`POST` | `COMMENT`) and `targetId: String` (no FK relation on `targetId`), plus `@@unique([userId, targetType, targetId])` to enforce one reaction per user per target at the database level. Target existence (does a post/comment with that id actually exist) is verified in `reactions.service.js` before insert, not by a database constraint.
 
 ## Consequences
 - The one-reaction-per-user-per-target rule is still DB-enforced (the part that matters most for correctness — preventing duplicate/racing reactions).

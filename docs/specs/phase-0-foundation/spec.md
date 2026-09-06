@@ -21,21 +21,21 @@ Stand up the repo, local database, backend skeleton, and shared conventions that
 - **Acceptance**: `npx prisma migrate dev --name init` succeeds against the Dockerized Postgres and generates a working Prisma Client.
 
 ### 4. Backend skeleton
-- `server/` is a TypeScript + Express project that boots with `npm run dev`.
+- `server/` is a JavaScript (Node.js/CommonJS) + Express project that boots with `npm run dev`.
 - `GET /health` returns `{ success: true, data: { status: "ok" }, message: "..." }` (the shared success envelope).
 - A deliberately-thrown error anywhere in the app returns `{ success: false, statusCode, message, errors? }` (the shared error envelope) via a single centralized `errorHandler` middleware — not ad-hoc per-route error handling.
 - **Acceptance**: hitting `/health` and a route that throws both return correctly shaped JSON with correct HTTP status codes.
 
 ### 5. Shared conventions available for reuse in later phases
-- `utils/ApiError.ts` (typed error class carrying `statusCode`/`message`/`errors`)
-- `utils/apiResponse.ts` (`sendSuccess` helper)
-- `middlewares/asyncHandler.ts` (wraps async route handlers so thrown/rejected errors reach `errorHandler`)
-- `middlewares/notFoundHandler.ts` (404 fallback in the same envelope shape)
-- `database/prisma.ts` (single `PrismaClient` instance, imported everywhere — no ad-hoc `new PrismaClient()` per module)
-- `config/env.ts` (validates required env vars at boot; process exits with a clear message if any are missing)
+- `utils/ApiError.js` (a small error class carrying `statusCode`/`message`/`errors`)
+- `utils/apiResponse.js` (`sendSuccess` helper)
+- `middlewares/asyncHandler.js` (wraps async route handlers so thrown/rejected errors reach `errorHandler`)
+- `middlewares/notFoundHandler.js` (404 fallback in the same envelope shape)
+- `database/prisma.js` (single `PrismaClient` instance, imported everywhere — no ad-hoc `new PrismaClient()` per module)
+- `config/env.js` (validates required env vars at boot; process exits with a clear message if any are missing)
 
 ## Out of Scope for This Phase
 No auth, no resource routes (posts/comments/reactions/users), no frontend. Those are Phase 1 and Phase 2.
 
 ## Environment Variables Introduced
-`server/.env.example`: `PORT`, `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `CORS_ORIGIN` (the last three are declared now since `config/env.ts` validates all required vars at once, even though JWT isn't used until Phase 1).
+`server/.env.example`: `PORT`, `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `CORS_ORIGIN` (the last three are declared now since `config/env.js` validates all required vars at once, even though JWT isn't used until Phase 1).

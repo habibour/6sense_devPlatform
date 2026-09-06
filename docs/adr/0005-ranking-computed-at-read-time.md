@@ -7,7 +7,7 @@ Accepted
 Posts need a rank score: `score = (likeCount - dislikeCount) + commentCount * 2` (see PRD section 4). Two implementation options exist: (a) store `rankScore` as a column on `Post`, recomputed on every write that affects it (new comment, new/changed reaction), or (b) store only the raw counters (`likeCount`, `dislikeCount`, `commentCount`) and compute `score` in the service layer whenever posts are listed.
 
 ## Decision
-Store `likeCount`, `dislikeCount`, and `commentCount` as denormalized integer columns on `Post`, updated transactionally alongside the reaction/comment write that changes them. Compute `score` in `posts.service.ts` at list time from those columns, and sort in application code (`score DESC, createdAt DESC`).
+Store `likeCount`, `dislikeCount`, and `commentCount` as denormalized integer columns on `Post`, updated transactionally alongside the reaction/comment write that changes them. Compute `score` in `posts.service.js` at list time from those columns, and sort in application code (`score DESC, createdAt DESC`).
 
 ## Consequences
 - Avoids a second write path (recomputing and persisting `rankScore`) that could drift from the underlying counters if a code path forgets to update it — fewer places for a consistency bug to hide.

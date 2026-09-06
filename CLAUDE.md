@@ -5,8 +5,8 @@ A full-stack "developer community" app (posts, threaded comments, reactions, ran
 
 ## Tech Stack
 - **Database**: PostgreSQL, run locally via Docker Compose (`docker-compose.yml`)
-- **Backend**: Node.js + Express + TypeScript, Prisma ORM, layered architecture (routes → controllers → services), flat per-layer folders
-- **Frontend**: Vite + React + TypeScript SPA, React Router, TanStack Query, Tailwind CSS
+- **Backend**: Node.js + Express + JavaScript (CommonJS), Prisma ORM, layered architecture (routes → controllers → services), flat per-layer folders
+- **Frontend**: Vite + React SPA (JavaScript/JSX), React Router, TanStack Query, Tailwind CSS
 
 ## Repository Layout
 ```
@@ -14,8 +14,8 @@ A full-stack "developer community" app (posts, threaded comments, reactions, ran
   CLAUDE.md               # this file
   docs/                    # spec-driven development docs (see below)
   docker-compose.yml
-  server/                  # Express + TypeScript + Prisma API
-  client/                  # Vite + React + TypeScript SPA
+  server/                  # Express + JavaScript + Prisma API
+  client/                  # Vite + React SPA (JavaScript/JSX)
   README.md                # human-facing setup/run instructions
   AI_USAGE.md              # required AI-usage write-up for the assignment
 ```
@@ -27,48 +27,48 @@ server/
     schema.prisma
     migrations/
   src/
-    app.ts                  # express app assembly: middleware, routes, swagger mount
-    index.ts                # boots the server
+    app.js                  # express app assembly: middleware, routes, swagger mount
+    index.js                # boots the server
     config/
-      env.ts                 # validates required env vars at boot
+      env.js                 # validates required env vars at boot
     database/
-      prisma.ts              # single PrismaClient instance, imported everywhere
+      prisma.js              # single PrismaClient instance, imported everywhere
     controllers/              # one file per resource: parse request, call service, sendSuccess
-      auth.controller.ts
-      users.controller.ts
-      posts.controller.ts
-      comments.controller.ts
-      reactions.controller.ts
+      auth.controller.js
+      users.controller.js
+      posts.controller.js
+      comments.controller.js
+      reactions.controller.js
     services/                 # business logic per resource (ranking, reaction counters, comment threading)
-      auth.service.ts
-      users.service.ts
-      posts.service.ts
-      comments.service.ts
-      reactions.service.ts
+      auth.service.js
+      users.service.js
+      posts.service.js
+      comments.service.js
+      reactions.service.js
     routes/                   # one file per resource, path+method+middleware wiring only
-      auth.routes.ts
-      users.routes.ts
-      posts.routes.ts
-      comments.routes.ts
-      reactions.routes.ts
-      index.ts                # mounts every router under /api
+      auth.routes.js
+      users.routes.js
+      posts.routes.js
+      comments.routes.js
+      reactions.routes.js
+      index.js                # mounts every router under /api
     middlewares/
-      auth.ts                 # requireAuth
-      errorHandler.ts
-      notFoundHandler.ts
-      asyncHandler.ts
+      auth.js                 # requireAuth
+      errorHandler.js
+      notFoundHandler.js
+      asyncHandler.js
     validators/                # zod schemas, one file per resource
     utils/
-      ApiError.ts
-      apiResponse.ts
-      jwt.ts
-      password.ts
-      ranking.ts
+      ApiError.js
+      apiResponse.js
+      jwt.js
+      password.js
+      ranking.js
     docs/
-      swagger.ts
+      swagger.js
 ```
 
-This is a flat, per-layer structure (matches the user's established convention from other Express projects), not a nested `modules/<resource>/` layout — one folder per architectural layer, one file per resource within it. There is no `models/` folder: Prisma's `schema.prisma` is the single source of truth for data models, and `database/prisma.ts` is the DB access point. There is no separate `repository/` layer: services call Prisma directly via `database/prisma.ts` — that indirection wasn't earning its keep at this project's size. See `docs/adr/0002-backend-express-typescript.md` for the full rationale.
+This is a flat, per-layer structure (matches the user's established convention from other Express projects), not a nested `modules/<resource>/` layout — one folder per architectural layer, one file per resource within it. Modules use CommonJS (`require`/`module.exports`), matching that same convention. There is no `models/` folder: Prisma's `schema.prisma` is the single source of truth for data models, and `database/prisma.js` is the DB access point. There is no separate `repository/` layer: services call Prisma directly via `database/prisma.js` — that indirection wasn't earning its keep at this project's size. See `docs/adr/0002-backend-express-javascript.md` for the full rationale.
 
 ## How the Docs System Works
 This project is built spec-driven. Before writing code for a phase, its spec and plan should exist and be current.
@@ -88,13 +88,13 @@ This project is built spec-driven. Before writing code for a phase, its spec and
 Success: { "success": true, "data": {}, "message": "optional" }
 Error:   { "success": false, "statusCode": 400, "message": "Human-readable error", "errors": [] }
 ```
-Use `utils/apiResponse.ts#sendSuccess` and throw `utils/ApiError.ts#ApiError` — never hand-write a response shape inline in a controller.
+Use `utils/apiResponse.js#sendSuccess` and throw `utils/ApiError.js#ApiError` — never hand-write a response shape inline in a controller.
 
 ### Backend layering
-`routes/` wire path+method+middleware only. `controllers/` parse the request and call a service — no business logic, no direct Prisma calls. `services/` hold business logic and call Prisma directly via `database/prisma.ts` — services are what would be unit-tested if the Jest bonus is added later. Wrap every async route handler in `asyncHandler` so errors reach the centralized `errorHandler`.
+`routes/` wire path+method+middleware only. `controllers/` parse the request and call a service — no business logic, no direct Prisma calls. `services/` hold business logic and call Prisma directly via `database/prisma.js` — services are what would be unit-tested if the Jest bonus is added later. Wrap every async route handler in `asyncHandler` so errors reach the centralized `errorHandler`.
 
 ### General
-- TypeScript strict mode on both `server/` and `client/`.
+- Plain JavaScript (CommonJS on the backend, JSX on the frontend) — no build/type-check step; keep functions small and validate at the boundary with zod instead of relying on compile-time types.
 - No secrets committed, ever. `.env.example` documents variable *names* only; real `.env` files are git-ignored.
 - Prefer editing/extending an existing file over introducing a new pattern for the same kind of thing (e.g. every resource has the same routes/controller/service/validator file shape — follow it).
 - Don't build ahead of the current phase's spec (no refresh tokens, no Jest tests, no optimistic UI, no pagination beyond page/limit) unless `docs/PRD.md`'s out-of-scope section is explicitly revised first.

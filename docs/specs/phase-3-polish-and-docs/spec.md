@@ -13,7 +13,7 @@ Close out the assignment's non-code requirements: a README that satisfies its ex
 
 ### 2. Root `README.md` — must satisfy every item in the assignment's checklist (section 8):
 - [ ] Project name and short description
-- [ ] Tech stack (FE, BE, DB) — explicitly states PostgreSQL, Express+TypeScript, Vite+React+TypeScript
+- [ ] Tech stack (FE, BE, DB) — explicitly states PostgreSQL, Express+JavaScript, Vite+React (JavaScript)
 - [ ] Local setup (clone → `docker compose up -d` → server install/env/migrate/run → client install/env/run)
 - [ ] Environment variables (names only, from `server/.env.example` and `client/.env.example`, each with a one-line description)
 - [ ] How to open Swagger/API docs locally (`http://localhost:<PORT>/api-docs`)

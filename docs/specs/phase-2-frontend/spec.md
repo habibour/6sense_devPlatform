@@ -3,7 +3,7 @@
 Maps to `docs/plans/phase-2-frontend/plan.md`. Depends on Phase 1 (every screen below is driven by real API calls, never fake/mock-only data).
 
 ## Goal
-A React SPA covering every screen the assignment requires, each with real loading/empty/error states, talking to the Phase 1 API through one typed API client layer.
+A React SPA (JavaScript/JSX) covering every screen the assignment requires, each with real loading/empty/error states, talking to the Phase 1 API through one shared API client layer.
 
 ## Screens & Acceptance Criteria
 
@@ -40,7 +40,7 @@ A React SPA covering every screen the assignment requires, each with real loadin
 - Viewing another user's profile never shows edit controls.
 
 ### API Integration (F7)
-- All API calls go through one `api/client.ts` (axios instance): base URL from `VITE_API_BASE_URL`, `Authorization: Bearer <token>` injected automatically when a token exists, and every non-2xx response normalized into a single `ApiClientError { statusCode, message, errors }` shape that every page/hook can catch and render identically.
+- All API calls go through one `api/client.js` (axios instance): base URL from `VITE_API_BASE_URL`, `Authorization: Bearer <token>` injected automatically when a token exists, and every non-2xx response normalized into a single `ApiClientError` (with `statusCode`, `message`, `errors`) shape that every page/hook can catch and render identically.
 - No page hand-rolls its own fetch/error-parsing logic outside this client.
 
 ### Polish (F8)

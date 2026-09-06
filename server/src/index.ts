@@ -1,9 +1,0 @@
-import { createApp } from "./app";
-import { env } from "./config/env";
-
-const app = createApp();
-const port = Number(env.PORT);
-
-app.listen(port, () => {
-  console.log(`Server listening on http://localhost:${port}`);
-});
