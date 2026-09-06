@@ -4,6 +4,7 @@ import FeedPage from './pages/FeedPage'
 import LoginPage from './pages/LoginPage'
 import NewPostPage from './pages/NewPostPage'
 import PostDetailPage from './pages/PostDetailPage'
+import ProfilePage from './pages/ProfilePage'
 import RegisterPage from './pages/RegisterPage'
 import ProtectedRoute from './routes/ProtectedRoute'
 
@@ -18,7 +19,7 @@ function TempHeader() {
       {user ? (
         <span className="text-slate-600">
           <Link to="/posts/new" className="text-indigo-600 hover:text-indigo-700 mr-3">New post</Link>
-          {user.name}{' '}
+          <Link to={`/profile/${user.id}`} className="text-indigo-600 hover:text-indigo-700">{user.name}</Link>{' '}
           <button onClick={logout} className="ml-2 text-indigo-600 hover:text-indigo-700">
             Logout
           </button>
@@ -43,6 +44,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/posts/:id" element={<PostDetailPage />} />
+        <Route path="/profile/:userId" element={<ProfilePage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/posts/new" element={<NewPostPage />} />
         </Route>
