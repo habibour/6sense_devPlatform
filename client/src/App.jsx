@@ -2,7 +2,10 @@ import { Link, Route, Routes } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import FeedPage from './pages/FeedPage'
 import LoginPage from './pages/LoginPage'
+import NewPostPage from './pages/NewPostPage'
+import PostDetailPage from './pages/PostDetailPage'
 import RegisterPage from './pages/RegisterPage'
+import ProtectedRoute from './routes/ProtectedRoute'
 
 function TempHeader() {
   const { user, logout } = useAuth()
@@ -14,6 +17,7 @@ function TempHeader() {
       </span>
       {user ? (
         <span className="text-slate-600">
+          <Link to="/posts/new" className="text-indigo-600 hover:text-indigo-700 mr-3">New post</Link>
           {user.name}{' '}
           <button onClick={logout} className="ml-2 text-indigo-600 hover:text-indigo-700">
             Logout
@@ -38,6 +42,10 @@ function App() {
         <Route path="/" element={<FeedPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/posts/:id" element={<PostDetailPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/posts/new" element={<NewPostPage />} />
+        </Route>
       </Routes>
     </div>
   )
