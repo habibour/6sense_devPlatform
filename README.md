@@ -55,6 +55,7 @@ See `docs/adr/` for the reasoning behind each of these choices. Icons are from `
 Every request flows through the same layers regardless of endpoint — routes only wire path/method/middleware, controllers parse and delegate, services hold all business logic and are the only layer that talks to Prisma:
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#eaf5f5", "primaryBorderColor": "#008080", "primaryTextColor": "#004c4c", "lineColor": "#006666", "secondaryColor": "#b2d8d8", "tertiaryColor": "#ffffff", "fontFamily": "Inter, ui-sans-serif, sans-serif", "clusterBkg": "#f7fbfb", "clusterBorder": "#66b2b2", "edgeLabelBackground": "#ffffff"}}}%%
 flowchart TD
     subgraph Client["Browser — React SPA (Vite)"]
         UI["Pages & components"] --> RQ["TanStack Query"] --> AX["Axios client<br/>client/src/api/client.js<br/>sends Authorization: Bearer JWT"]
@@ -74,12 +75,18 @@ flowchart TD
 
     PRISMA -->|"SQL via Prisma Client"| DB[("PostgreSQL<br/>schema.prisma = source of truth")]
     RESP -->|"JSON response"| AX
+
+    classDef decision fill:#fdf3e7,stroke:#c98a2b,color:#7a4a10,stroke-width:1.5px;
+    classDef store fill:#b2d8d8,stroke:#004c4c,color:#003939,stroke-width:1.5px;
+    class AUTH decision;
+    class DB store;
 ```
 
 ### Production deployment topology
 The [Live Demo](#live-demo) runs on Render (frontend + backend) and Neon (database) — see [Deployment](#deployment) for the reproducible steps and `docs/adr/0010-deployment-platform.md` for the reasoning:
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#eaf5f5", "primaryBorderColor": "#008080", "primaryTextColor": "#004c4c", "lineColor": "#006666", "secondaryColor": "#b2d8d8", "tertiaryColor": "#ffffff", "fontFamily": "Inter, ui-sans-serif, sans-serif", "clusterBkg": "#f7fbfb", "clusterBorder": "#66b2b2", "edgeLabelBackground": "#ffffff"}}}%%
 flowchart LR
     V(["Visitor's browser"])
 
@@ -93,6 +100,11 @@ flowchart LR
     V -->|"GET /"| FE
     FE -->|"fetch VITE_API_BASE_URL/api/*<br/>Authorization: Bearer JWT"| BE
     BE -->|"DATABASE_URL (sslmode=require)"| NEON
+
+    classDef entry fill:#ffffff,stroke:#66b2b2,stroke-width:1.5px,color:#004c4c;
+    classDef store fill:#b2d8d8,stroke:#004c4c,color:#003939,stroke-width:1.5px;
+    class V entry;
+    class NEON store;
 ```
 
 Two things that don't show up as boxes but matter: the frontend's SPA client-side routes (e.g. `/login`, `/posts/:id`) are served via a Render dashboard Redirect/Rewrite rule (`/*` → `/index.html`), not a repo file — Render doesn't support Netlify's `_redirects` convention; and the backend's free instance spins down after 15 minutes idle, so the first request after a quiet period takes ~30-60s to wake.
