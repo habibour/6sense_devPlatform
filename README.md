@@ -30,6 +30,12 @@ A developer community app — posts, threaded comments, like/dislike reactions, 
 
 ## Live Demo
 
+<p align="center">
+  <a href="https://sixsense-devplatform-client.onrender.com/">
+    <img src="docs/assets/live-demo-banner.svg" width="600" alt="Live Demo — built and deployed end-to-end. Click to open sixsense-devplatform-client.onrender.com" />
+  </a>
+</p>
+
 **Live app:** [sixsense-devplatform-client.onrender.com](https://sixsense-devplatform-client.onrender.com/) (also linked at the very top of this README).
 
 The backend runs on Render's free tier and the database on Neon's free tier. The backend spins down after 15 minutes of inactivity, so **the first request may take 30-60 seconds** while it wakes back up — please be patient on first load.
